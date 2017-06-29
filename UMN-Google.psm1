@@ -611,8 +611,8 @@ function move-GSheetData
         if (!$Index) {write-host "$Query in $columnKey does not exist"
             break}
         Else {
-        $rowIndex = $index +2    
-        $startRow = $Index + 1
+        $rowIndex = $index[0] + 2    
+        $startRow = $Index[0] + 1
         $destinationRow = ($destinationData).count + 2
         $destinationStartRow = ($destinationData).count + 1
         }
