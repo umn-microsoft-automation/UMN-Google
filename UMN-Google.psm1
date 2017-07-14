@@ -741,5 +741,58 @@ function remove-GSheet
     }
 }
 
+
+function clear-GSheet
+{
+    <#
+        .Synopsis
+        Clear all data and leave formatting intact for a sheet from a spreadsheet based on sheetID
+        .DESCRIPTION
+            This function will delete data from a sheet
+        .EXAMPLE
+            $pageID = 0  ## using pageID to differentiate from sheetID -- 
+            In this case, index 0 is the actual sheetID per the API and will be deleted.
+
+            $sheetID = ## the id number of the file/spreadsheet
+
+            clear-gsheet -pageID $pageID -sheetID $sheetID -accessToken $accessToken
+
+        .EXAMPLE
+        
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$pageID,
+        
+        [Parameter(Mandatory)]
+        [string]$sheetID,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
+    )
+
+    Begin
+    {
+        If (!$properties)
+            {
+            $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$pageID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
+            }
+
+    }
+    Process
+    {
+        $suffix = "$sheetID" + ":batchUpdate"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+        $ContentType = "application/json"
+        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End
+    {
+    return([array]$data)
+    }
+}
+
 ##########################################################################################################################
 Export-ModuleMember -Function *
