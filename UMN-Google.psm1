@@ -1,6 +1,6 @@
 ﻿###############
 # Module for interacting with Google API
-#
+# More details found at https://developers.google.com/sheets/ and https://developers.google.com/drive/
 #
 ###############
 
@@ -413,7 +413,7 @@ function Get-GSheetProperties
     }
 }
 
-function get-GSheetID
+function Get-GSheetID
 {
     <#
         .Synopsis
@@ -464,23 +464,34 @@ function New-GSheet
 {
     <#
         .Synopsis
-        Provide JSON properties to create new Google Sheet.
+            Create a new Google Sheet.
+        
         .DESCRIPTION
-        The properties that can be set are extensive. Cell color, formatting etc - most commonly this will only be used for setting the file name.
-        Return is array data of the created sheet in order to retrieve the newly generated sheetID to continue working with the remaining functions.
+            Create a new Google Sheet.
+        
+        .PARAMETER title
+            Use this in the simplest case to just create a new sheet with a Title/name
+
+        .PARAMETER properties
+            Alternatively, The properties that can be set are extensive. Cell color, formatting etc.  If you use this you MUST include @{properties=@{title='mY sheet'}} |convertto-json
+            at a minimum.  More details at https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create
+
         .EXAMPLE
             Example for setting the title of the sheet 
-        $properties = @{properties=@{title="JSON ARRAYS ARE AWESOME"}} |convertto-json
-        create-GSheet -properties $properties -accessToken $accessToken
+            $properties = @{properties=@{title='my sheet'}} |convertto-json
+            create-GSheet -properties $properties -accessToken $accessToken
+
         .EXAMPLE
-        Another example of how to use this cmdlet
+            create-GSheet -title 'My sheet' -accessToken $accessToken
+
     #>
     [CmdletBinding()]
     Param
     (
-        [Parameter(Mandatory)]
-        [string]$Title,
+        [Parameter(ParameterSetName='title')]
+        [string]$title,
 
+        [Parameter(ParameterSetName='properties')]
         [array]$properties
     )
 
@@ -488,7 +499,7 @@ function New-GSheet
     {
         If (!$properties)
             {
-            $properties = @{properties=@{title=$Title}} |convertto-json
+                $properties = @{properties=@{title=$title}} |convertto-json
             }
     }
     Process
@@ -503,17 +514,29 @@ function New-GSheet
     }
 }
 
-function set-GSheetPermissions
+function Set-GSheetPermissions
 {
     <#
         .Synopsis
-        Provide JSON properties to set file permissions.
+            Set Permissions on Google Sheet
+
         .DESCRIPTION
+            Set Permissions on Google Sheet
+
+        .PARAMETER emailAddress
+            Email address of the user or group to grant permissions to
+        
+        .PARAMETER sheetID
+            The sheetID to apply permissions to.  This is returned when a new sheet is created or use Get-GSheetID
+
+        .PARAMETER role
+            Role to assign, select from 'writer','reader','commenter'
+
+        .PARAMETER type
+            This refers to the emailAddress, is it a user or a group
 
         .EXAMPLE
-
-        .EXAMPLE
-        Another example of how to use this cmdlet
+            set-GSheetPermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
     #>
     [CmdletBinding()]
     Param
@@ -521,14 +544,15 @@ function set-GSheetPermissions
         [Parameter(Mandatory)]
         [string]$emailAddress, ## email address of user or group to be shared with
 
+        #[Alias("fileID")]
         [Parameter(Mandatory)]
-        [string]$fileID,
+        [string]$sheetID,
 
+        [ValidateSet('writer','reader','commenter')]
         [string]$role = "writer",
 
         [ValidateSet('user','group')]
         [string]$type
-
  
     )
 
@@ -537,6 +561,7 @@ function set-GSheetPermissions
     }
     Process
     {
+        $fileID = $sheetID
         $json = @{emailAddress=$emailAddress;type=$type;role=$role} | ConvertTo-Json
         $ContentType = "application/json"
         $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
@@ -545,12 +570,11 @@ function set-GSheetPermissions
     }
     End
     {
-    return([array]$data)
+        return([array]$data)
     }
 }
 
-
-function move-GSheetData
+function Move-GSheetData
 {
     <#
         .Synopsis
@@ -642,7 +666,7 @@ function move-GSheetData
     }
 }
 
-function add-GSheet
+function Add-GSheet
 {
     <#
     .Synopsis
@@ -690,7 +714,7 @@ function add-GSheet
     }
 }
 
-function remove-GSheet
+function Remove-GSheet
 {
     <#
         .Synopsis
