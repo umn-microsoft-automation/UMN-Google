@@ -234,6 +234,108 @@ function Get-GOAuthTokenService
 
 ################################################## sheets #################################################################
 
+function Add-GSheet
+{
+    <#
+    .Synopsis
+        Add named pages/sheets to an existing document
+    .DESCRIPTION
+        This function will add a specified sheet name to a google spreadsheet.
+    .EXAMPLE
+        $sheetName = "Data 2"
+        $sheetID = ## the id number of the file
+        add-gSheet -sheetName $sheetName -sheetID $sheetID -accessToken $accessToken
+
+    .EXAMPLE
+    
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$sheetName,
+
+        [Parameter(Mandatory)]
+        [string]$sheetID,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
+    )
+
+    Begin
+    {
+        If (!$properties)
+            {
+            $properties = @{requests=@(@{addSheet=@{properties=@{title=$sheetName}}})} |convertto-json -Depth 10
+            }
+    }
+    Process
+    {
+        $suffix = "$sheetID" + ":batchUpdate"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+        $ContentType = "application/json"
+        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End
+    {
+    return([array]$data)
+    }
+}
+
+function Clear-GSheet
+{
+    <#
+        .Synopsis
+            Clear all data and leave formatting intact for a sheet from a spreadsheet based on sheetID
+
+        .DESCRIPTION
+            This function will delete data from a sheet
+
+        .EXAMPLE
+            $pageID = 0  ## using pageID to differentiate from sheetID -- 
+            In this case, index 0 is the actual sheetID per the API and will be deleted.
+
+            $sheetID = ## the id number of the file/spreadsheet
+
+            clear-gsheet -pageID $pageID -sheetID $sheetID -accessToken $accessToken
+
+        .EXAMPLE
+        
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$pageID,
+        
+        [Parameter(Mandatory)]
+        [string]$sheetID,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
+    )
+
+    Begin
+    {
+        If (!$properties)
+            {
+                $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$pageID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
+            }
+
+    }
+    Process
+    {
+        $suffix = "$sheetID" + ":batchUpdate"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+        $ContentType = "application/json"
+        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End
+    {
+    return([array]$data)
+    }
+}
+
 function Get-GSheetData
 {
     <#
@@ -307,112 +409,6 @@ function Get-GSheetData
     }
 }
 
-function Set-GSheetData
-{
-    <#
-        .Synopsis
-        Set values in sheet in specific cell locations or append data to a sheet
-        .DESCRIPTION
-        Long description
-        .EXAMPLE
-        Set-GSheetData -sheetID '1LvqbZSTlgQNIBC2bkv9Ze6nFWPBY98ASI2_sMc1DQSE' -accessToken $accessToken -sheetName 'Sheet1' -rangeA1 'A19:B20' -values @(@("a","b"),@("c","D"))
-        .EXAMPLE
-        Another example of how to use this cmdlet
-    #>
-    [CmdletBinding()]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$sheetID,
-
-        [Parameter(Mandatory)]
-        [string]$accessToken,
-
-        [Parameter(Mandatory)]
-        [string]$sheetName,
-
-        ## Range in A1 notation https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx
-        ## The dimensions of the $values you put in MUST fit within this range
-        [Parameter(ParameterSetName='set')]
-        [string]$rangeA1,
-
-        [Parameter(ParameterSetName='Append')]
-        [switch]$append,
-
-        ## This shoudl be an array or arrays.  Each internal array represents one ROW
-        [Parameter(Mandatory)]
-        [System.Collections.ArrayList]$values,
-
-        [string]$valueInputOption = 'RAW'
-
-    )
-
-    Begin
-    {
-    }
-    Process
-    {
-        if ($append)
-        {
-            $method = 'POST'
-            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName"+":append?valueInputOption=$valueInputOption"
-        }
-        else
-        {
-            $method = 'PUT'
-            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName!$rangeA1"+"?valueInputOption=$valueInputOption"
-        }
-        $json = @{values=$values} | ConvertTo-Json
-        ###### uncomment the following two lines for debug
-        #$uri
-        #$json
-        $ContentType = "application/json"
-        
-        Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
-        
-    }
-    End
-    {
-    }
-}
-
-function Get-GSheetProperties
-{
-    <#
-        .Synopsis
-        Short description
-        .DESCRIPTION
-        Long description
-        .EXAMPLE
-        Example of how to use this cmdlet
-        .EXAMPLE
-        Another example of how to use this cmdlet
-    #>
-    [CmdletBinding()]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$sheetID,
-
-        [Parameter(Mandatory)]
-        [string]$accessToken
-
-    )
-
-    Begin
-    {
-    }
-    Process
-    {
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID"
-        $Data = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
-    }
-    End
-    {
-        return([array]$data)
-    }
-}
-
 function Get-GSheetID
 {
     <#
@@ -460,100 +456,27 @@ function Get-GSheetID
     }
 }
 
-function New-GSheet
+function Get-GSheetProperties
 {
     <#
         .Synopsis
-            Create a new Google Sheet.
-        
+        Short description
         .DESCRIPTION
-            Create a new Google Sheet.
-        
-        .PARAMETER title
-            Use this in the simplest case to just create a new sheet with a Title/name
-
-        .PARAMETER properties
-            Alternatively, The properties that can be set are extensive. Cell color, formatting etc.  If you use this you MUST include @{properties=@{title='mY sheet'}} |convertto-json
-            at a minimum.  More details at https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create
-
+        Long description
         .EXAMPLE
-            Example for setting the title of the sheet 
-            $properties = @{properties=@{title='my sheet'}} |convertto-json
-            create-GSheet -properties $properties -accessToken $accessToken
-
+        Example of how to use this cmdlet
         .EXAMPLE
-            create-GSheet -title 'My sheet' -accessToken $accessToken
-
+        Another example of how to use this cmdlet
     #>
     [CmdletBinding()]
     Param
     (
-        [Parameter(ParameterSetName='title')]
-        [string]$title,
-
-        [Parameter(ParameterSetName='properties')]
-        [array]$properties
-    )
-
-    Begin
-    {
-        If (!$properties)
-            {
-                $properties = @{properties=@{title=$title}} |convertto-json
-            }
-    }
-    Process
-    {
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets"
-        $ContentType = "application/json"
-        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
-    }
-    End
-    {
-    return([array]$data)
-    }
-}
-
-function Set-GSheetPermissions
-{
-    <#
-        .Synopsis
-            Set Permissions on Google Sheet
-
-        .DESCRIPTION
-            Set Permissions on Google Sheet
-
-        .PARAMETER emailAddress
-            Email address of the user or group to grant permissions to
-        
-        .PARAMETER sheetID
-            The sheetID to apply permissions to.  This is returned when a new sheet is created or use Get-GSheetID
-
-        .PARAMETER role
-            Role to assign, select from 'writer','reader','commenter'
-
-        .PARAMETER type
-            This refers to the emailAddress, is it a user or a group
-
-        .EXAMPLE
-            set-GSheetPermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
-    #>
-    [CmdletBinding()]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$emailAddress, ## email address of user or group to be shared with
-
-        #[Alias("fileID")]
         [Parameter(Mandatory)]
         [string]$sheetID,
 
-        [ValidateSet('writer','reader','commenter')]
-        [string]$role = "writer",
+        [Parameter(Mandatory)]
+        [string]$accessToken
 
-        [ValidateSet('user','group')]
-        [string]$type
- 
     )
 
     Begin
@@ -561,12 +484,8 @@ function Set-GSheetPermissions
     }
     Process
     {
-        $fileID = $sheetID
-        $json = @{emailAddress=$emailAddress;type=$type;role=$role} | ConvertTo-Json
-        $ContentType = "application/json"
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
-        
-        Invoke-RestMethod -Method post -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID"
+        $Data = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
     }
     End
     {
@@ -666,45 +585,51 @@ function Move-GSheetData
     }
 }
 
-function Add-GSheet
+function New-GSheet
 {
     <#
-    .Synopsis
-        Add named pages/sheets to an existing document
-    .DESCRIPTION
-        This function will add a specified sheet name to a google spreadsheet.
-    .EXAMPLE
-        $sheetName = "Data 2"
-        $sheetID = ## the id number of the file
-        add-gSheet -sheetName $sheetName -sheetID $sheetID -accessToken $accessToken
+        .Synopsis
+            Create a new Google Sheet.
+        
+        .DESCRIPTION
+            Create a new Google Sheet.
+        
+        .PARAMETER title
+            Use this in the simplest case to just create a new sheet with a Title/name
 
-    .EXAMPLE
-    
+        .PARAMETER properties
+            Alternatively, The properties that can be set are extensive. Cell color, formatting etc.  If you use this you MUST include @{properties=@{title='mY sheet'}} |convertto-json
+            at a minimum.  More details at https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create
+
+        .EXAMPLE
+            Example for setting the title of the sheet 
+            $properties = @{properties=@{title='my sheet'}} |convertto-json
+            create-GSheet -properties $properties -accessToken $accessToken
+
+        .EXAMPLE
+            create-GSheet -title 'My sheet' -accessToken $accessToken
+
     #>
     [CmdletBinding()]
     Param
     (
-        [Parameter(Mandatory)]
-        [string]$sheetName,
+        [Parameter(ParameterSetName='title')]
+        [string]$title,
 
-        [Parameter(Mandatory)]
-        [string]$sheetID,
-
-        [Parameter(Mandatory)]
-        [string]$accessToken
+        [Parameter(ParameterSetName='properties')]
+        [array]$properties
     )
 
     Begin
     {
         If (!$properties)
             {
-            $properties = @{requests=@(@{addSheet=@{properties=@{title=$sheetName}}})} |convertto-json -Depth 10
+                $properties = @{properties=@{title=$title}} |convertto-json
             }
     }
     Process
     {
-        $suffix = "$sheetID" + ":batchUpdate"
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets"
         $ContentType = "application/json"
         $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
     }
@@ -765,56 +690,132 @@ function Remove-GSheet
     }
 }
 
-
-function clear-GSheet
+function Set-GSheetData
 {
     <#
         .Synopsis
-        Clear all data and leave formatting intact for a sheet from a spreadsheet based on sheetID
+        Set values in sheet in specific cell locations or append data to a sheet
         .DESCRIPTION
-            This function will delete data from a sheet
+        Long description
         .EXAMPLE
-            $pageID = 0  ## using pageID to differentiate from sheetID -- 
-            In this case, index 0 is the actual sheetID per the API and will be deleted.
-
-            $sheetID = ## the id number of the file/spreadsheet
-
-            clear-gsheet -pageID $pageID -sheetID $sheetID -accessToken $accessToken
-
+        Set-GSheetData -sheetID '1LvqbZSTlgQNIBC2bkv9Ze6nFWPBY98ASI2_sMc1DQSE' -accessToken $accessToken -sheetName 'Sheet1' -rangeA1 'A19:B20' -values @(@("a","b"),@("c","D"))
         .EXAMPLE
-        
+        Another example of how to use this cmdlet
     #>
     [CmdletBinding()]
     Param
     (
         [Parameter(Mandatory)]
-        [string]$pageID,
-        
-        [Parameter(Mandatory)]
         [string]$sheetID,
 
         [Parameter(Mandatory)]
-        [string]$accessToken
+        [string]$accessToken,
+
+        [Parameter(Mandatory)]
+        [string]$sheetName,
+
+        ## Range in A1 notation https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx
+        ## The dimensions of the $values you put in MUST fit within this range
+        [Parameter(ParameterSetName='set')]
+        [string]$rangeA1,
+
+        [Parameter(ParameterSetName='Append')]
+        [switch]$append,
+
+        ## This shoudl be an array or arrays.  Each internal array represents one ROW
+        [Parameter(Mandatory)]
+        [System.Collections.ArrayList]$values,
+
+        [string]$valueInputOption = 'RAW'
+
     )
 
     Begin
     {
-        If (!$properties)
-            {
-            $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$pageID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
-            }
-
     }
     Process
     {
-        $suffix = "$sheetID" + ":batchUpdate"
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+        if ($append)
+        {
+            $method = 'POST'
+            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName"+":append?valueInputOption=$valueInputOption"
+        }
+        else
+        {
+            $method = 'PUT'
+            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName!$rangeA1"+"?valueInputOption=$valueInputOption"
+        }
+        $json = @{values=$values} | ConvertTo-Json
+        ###### uncomment the following two lines for debug
+        #$uri
+        #$json
         $ContentType = "application/json"
-        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        
+        Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        
     }
     End
     {
-    return([array]$data)
+    }
+}
+
+function Set-GSheetPermissions
+{
+    <#
+        .Synopsis
+            Set Permissions on Google Sheet
+
+        .DESCRIPTION
+            Set Permissions on Google Sheet
+
+        .PARAMETER emailAddress
+            Email address of the user or group to grant permissions to
+        
+        .PARAMETER sheetID
+            The sheetID to apply permissions to.  This is returned when a new sheet is created or use Get-GSheetID
+
+        .PARAMETER role
+            Role to assign, select from 'writer','reader','commenter'
+
+        .PARAMETER type
+            This refers to the emailAddress, is it a user or a group
+
+        .EXAMPLE
+            set-GSheetPermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$emailAddress, ## email address of user or group to be shared with
+
+        #[Alias("fileID")]
+        [Parameter(Mandatory)]
+        [string]$sheetID,
+
+        [ValidateSet('writer','reader','commenter')]
+        [string]$role = "writer",
+
+        [ValidateSet('user','group')]
+        [string]$type
+ 
+    )
+
+    Begin
+    {
+    }
+    Process
+    {
+        $fileID = $sheetID
+        $json = @{emailAddress=$emailAddress;type=$type;role=$role} | ConvertTo-Json
+        $ContentType = "application/json"
+        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
+        
+        Invoke-RestMethod -Method post -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End
+    {
+        return([array]$data)
     }
 }
 
