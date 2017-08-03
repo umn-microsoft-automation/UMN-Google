@@ -653,6 +653,9 @@ function New-GSheetSpreadSheet
             Alternatively, The properties that can be set are extensive. Cell color, formatting etc.  If you use this you MUST include @{properties=@{title='mY sheet'}} |convertto-json
             at a minimum.  More details at https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/create
 
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
         .EXAMPLE
             Example for setting the title of the sheet 
             $properties = @{properties=@{title='my sheet'}} |convertto-json
@@ -669,7 +672,10 @@ function New-GSheetSpreadSheet
         [string]$title,
 
         [Parameter(ParameterSetName='properties')]
-        [array]$properties
+        [array]$properties,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
     )
 
     Begin
@@ -872,6 +878,9 @@ function Set-GSheetSpreadSheetPermissions
         .PARAMETER type
             This refers to the emailAddress, is it a user or a group
 
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
         .EXAMPLE
             set-GSheetPermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
     #>
@@ -889,7 +898,10 @@ function Set-GSheetSpreadSheetPermissions
         [string]$role = "writer",
 
         [ValidateSet('user','group')]
-        [string]$type
+        [string]$type,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
  
     )
 
