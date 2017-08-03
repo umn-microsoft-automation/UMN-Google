@@ -232,21 +232,28 @@ function Get-GOAuthTokenService
     }
 }
 
-################################################## sheets #################################################################
+################################################## SpreadSheets #################################################################
 
-function Add-GSheet
+function Add-GSheetSheet
 {
     <#
-    .Synopsis
-        Add named pages/sheets to an existing document
-    .DESCRIPTION
-        This function will add a specified sheet name to a google spreadsheet.
-    .EXAMPLE
-        $sheetName = "Data 2"
-        $sheetID = ## the id number of the file
-        add-gSheet -sheetName $sheetName -sheetID $sheetID -accessToken $accessToken
+        .Synopsis
+            Add named pages/sheets to an existing document
+    
+        .DESCRIPTION
+            This function will add a specified sheet name to a google spreadsheet.
+    
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
-    .EXAMPLE
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name to apply to new sheet
+        
+        .EXAMPLE
+
     
     #>
     [CmdletBinding()]
@@ -256,33 +263,25 @@ function Add-GSheet
         [string]$sheetName,
 
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$spreadSheetID,
 
         [Parameter(Mandatory)]
         [string]$accessToken
     )
 
-    Begin
-    {
-        If (!$properties)
-            {
-            $properties = @{requests=@(@{addSheet=@{properties=@{title=$sheetName}}})} |convertto-json -Depth 10
-            }
-    }
+    Begin{}
     Process
     {
-        $suffix = "$sheetID" + ":batchUpdate"
+        $properties = @{requests=@(@{addSheet=@{properties=@{title=$sheetName}}})} |convertto-json -Depth 10
+        $suffix = "$spreadSheetID" + ":batchUpdate"
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
         $ContentType = "application/json"
-        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
     }
-    End
-    {
-    return([array]$data)
-    }
+    End{}
 }
 
-function Clear-GSheet
+function Clear-GSheetSheet
 {
     <#
         .Synopsis
@@ -290,6 +289,15 @@ function Clear-GSheet
 
         .DESCRIPTION
             This function will delete data from a sheet
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name of sheet to clear
 
         .EXAMPLE
             $pageID = 0  ## using pageID to differentiate from sheetID -- 
@@ -299,60 +307,59 @@ function Clear-GSheet
 
             clear-gsheet -pageID $pageID -sheetID $sheetID -accessToken $accessToken
 
-        .EXAMPLE
         
     #>
     [CmdletBinding()]
     Param
     (
         [Parameter(Mandatory)]
-        [string]$pageID,
+        [string]$spreadSheetID,
         
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$sheetName,
 
         [Parameter(Mandatory)]
         [string]$accessToken
     )
 
-    Begin
-    {
-        If (!$properties)
-            {
-                $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$pageID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
-            }
-
-    }
+    Begin{}
     Process
     {
-        $suffix = "$sheetID" + ":batchUpdate"
+        $sheetID = Get-GSheetSheetIndex -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+        $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$sheetID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
+        $suffix = "$spreadSheetID" + ":batchUpdate"
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
         $ContentType = "application/json"
-        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
     }
-    End
-    {
-    return([array]$data)
-    }
+    End{}
 }
 
 function Get-GSheetData
 {
     <#
         .Synopsis
-        Basic function for retrieving data from a specific Google Sheet.
+            Basic function for retrieving data from a specificSheet in a Google SpreadSheet.
         .DESCRIPTION
-        Long description
+            Basic function for retrieving data from a specificSheet in a Google SpreadSheet.
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name of sheet to data from
+
         .EXAMPLE
-        Example of how to use this cmdlet
-        .EXAMPLE
-        Another example of how to use this cmdlet
+        
     #>
     [CmdletBinding()]
     Param
     (
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$spreadSheetID,
 
         [Parameter(Mandatory)]
         [string]$accessToken,
@@ -374,12 +381,10 @@ function Get-GSheetData
 
     )
 
-    Begin
-    {
-    }
+    Begin{}
     Process
     {
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID/values/$sheetName"
 
         if($cell -eq "Range") {
             $uri += "!$rangeA1"
@@ -404,30 +409,28 @@ function Get-GSheetData
             [PSCustomObject]$h
         }
     }
-    End
-    {
-    }
+    End{}
 }
 
-function Get-GSheetID
+function Get-GSheetSpreadSheetID
 {
     <#
         .Synopsis
-        Get a spreadsheet ID.
+            Get a spreadsheet ID.
+
         .DESCRIPTION
-        Provide a case sensative sheet name to the function to get back the sheetID used in many other API calls.
-        mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
+            Provide a case sensative sheet name to the function to get back the sheetID used in many other API calls.
+            mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER fileName
+            Name of file to retrive ID for, gernerally this is the same as the SpreadSheet Name.
+        
         .EXAMPLE
-        $fileName = 'Test'
-        get-GSheetID -fileName $fileName
-        There are  2  files matching the provided name. Please investigate the following sheet IDs to verify which file you want.
-            sheetID0 = 1X3JO1sbchh6F8ZxOwTxyAVVqUisyVM2qWRipfDoeLdQ
-            sheetID1 = 1I7mhlRDazIF3f5chIcDN7ru1hkrGlxAWCXtpHw6L4Nc
-        .EXAMPLE
-            Case sensitivity - 
-        $fileName = 'test'
-        get-GSheetID -FileName 'test'
-            1wKsiD7QOglTwA27eoKqmdwudJL4XAjt2rx58gpscBVY
+            Case sensitivity -
+            get-GSheetSpreadSheetID -FileName 'test'
     #>
     [CmdletBinding()]
     Param
@@ -439,58 +442,95 @@ function Get-GSheetID
         [string]$accessToken
     )
 
-    Begin
-    {
-    }
+    Begin{}
     Process
     {
 
-        $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$FileName'"
-        $sheetID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | where {$_.mimetype -eq "application/vnd.google-apps.spreadsheet"}).id
-        If ($sheetID.count -eq 0){throw "There are no files matching the name $fileName"}
-        If ($sheetID.count -gt 1){Write-Warning "There are $($sheetid.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($sheetID)}
-        Else{return($sheetID)}
+        $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
+        $spreadSheetID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | where {$_.mimetype -eq "application/vnd.google-apps.spreadsheet"}).id
+        If ($spreadSheetID.count -eq 0){throw "There are no files matching the name $fileName"}
+        If ($spreadSheetID.count -gt 1){Write-Warning "There are $($spreadSheetID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($spreadSheetID)}
+        Else{return($spreadSheetID)}
     }
-    End
-    {                
-    }
+    End{}
 }
 
-function Get-GSheetProperties
+function Get-GSheetSheetIndex
 {
     <#
         .Synopsis
-        Short description
+            Get Index of specific sheet in a Spreadsheet
+
         .DESCRIPTION
-        Long description
-        .EXAMPLE
-        Example of how to use this cmdlet
-        .EXAMPLE
-        Another example of how to use this cmdlet
+         Get Index of specific sheet in a Spreadsheet
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name of sheet used to fetch the Index
+  
     #>
     [CmdletBinding()]
     Param
     (
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$spreadSheetID,
+
+        [Parameter(Mandatory)]
+        [string]$sheetName,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
+    )
+
+    Begin{}
+    Process
+    {
+        $spreadSheet = Get-GSheetSpreadSheetProperties -spreadSheetID $spreadSheetID -accessToken $accessToken
+        ($spreadSheet.sheets.properties | Where-Object {$_.title -eq $sheetName}).index
+    }
+    End{}
+}
+
+function Get-GSheetSpreadSheetProperties
+{
+    <#
+        .Synopsis
+            Get the properties of a SpreadSheet
+
+        .DESCRIPTION
+            Get the properties of a SpreadSheet
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .EXAMPLE
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$spreadSheetID,
 
         [Parameter(Mandatory)]
         [string]$accessToken
 
     )
 
-    Begin
-    {
-    }
+    Begin{}
     Process
     {
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID"
-        $Data = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID"
+        Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
     }
-    End
-    {
-        return([array]$data)
-    }
+    End{}
 }
 
 function Move-GSheetData
@@ -501,6 +541,23 @@ function Move-GSheetData
         .DESCRIPTION
             This is a cut and paste between sheets in a spreadsheet.
             The function will find the row index based on search criteria, and move between the sheets provided.
+        
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER currentSheetName
+            Name of sheet to be coppied
+
+        .PARAMETER newSheetName
+            Name for new sheet
+
+        .PARAMETER query
+
+        .PARAMETER columnKey
+        
         .EXAMPLE
             $newSheetName = 'Decommissioned'
             $currentSheetName = 'Servers'
@@ -517,16 +574,16 @@ function Move-GSheetData
     Param
     (
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$spreadSheetID,
 
         [Parameter(Mandatory)]
         [string]$accessToken,
 
         [Parameter(Mandatory)]
-        [string]$currentSheetName,
+        [string]$sourceSheetName,
 
         [Parameter(Mandatory)]
-        [string]$newSheetName,
+        [string]$destinationSheetName,
 
         [Parameter(Mandatory)]
         [string]$query,
@@ -536,16 +593,12 @@ function Move-GSheetData
 
     )
 
-    Begin
-    {
-
-
-    }
+    Begin{}
     Process
     {
         ## Query all data from sheet
-        $data = Get-GSheetData -sheetID $sheetID -accessToken $accessToken -sheetName $currentSheetName -cell AllData
-        $destinationData = Get-GSheetData -sheetID $sheetID -accessToken $accessToken -sheetName $newSheetName -cell AllData
+        $data = Get-GSheetData -spreadSheetID $spreadSheetID-accessToken $accessToken -sheetName $sourceSheetName -cell AllData
+        $destinationData = Get-GSheetData -spreadSheetID $spreadSheetID -accessToken $accessToken -sheetName $destinationSheetName -cell AllData
 
         ## Get row query belongs to
         $Index = (0..($data.count -1) | where {$Data[$_].$columnKey -eq $query})
@@ -561,18 +614,18 @@ function Move-GSheetData
         }
 
         ## Get sheet index ID numbers
-        $allSheetProperties = (Get-GSheetProperties -sheetID $sheetID -accessToken $accessToken).sheets.properties
+        $allSheetProperties = (Get-GSheetSpreadSheetProperties -spreadSheetID $spreadSheetID -accessToken $accessToken).sheets.properties
 
-        $currentSheetIndex = ($allSheetProperties | where {$_.title -eq $currentSheetName}).sheetID
-        $newSheetIndex = ($allSheetProperties | where {$_.title -eq $newSheetName}).sheetID                                
+        $srcSheetIndex = ($allSheetProperties | where {$_.title -eq $sourceSheetName}).sheetID
+        $dstSheetIndex = ($allSheetProperties | where {$_.title -eq $destinationSheetName}).sheetID                                
 
         $method = 'POST'
-        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID"+":batchUpdate"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID"+":batchUpdate"
         $ContentType = "application/json"
         
    
         ## cutPaste row to row 
-        $values = @{"cutPaste"=@{"source"=@{"sheetId"=$currentSheetIndex;"startRowIndex"=$startRow;"endRowIndex"=$rowIndex};"destination"=@{"sheetId"=$newSheetIndex;"rowIndex"=$destinationRow};"pasteType"="PASTE_NORMAL"}}
+        $values = @{"cutPaste"=@{"source"=@{"sheetId"=$srcSheetIndex;"startRowIndex"=$startRow;"endRowIndex"=$rowIndex};"destination"=@{"sheetId"=$dstSheetIndex;"rowIndex"=$destinationRow};"pasteType"="PASTE_NORMAL"}}
         $JSON = @{"requests"=$values} |ConvertTo-Json -Depth 20
             
         
@@ -580,19 +633,17 @@ function Move-GSheetData
         Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
         
     }
-    End
-    {
-    }
+    End{}
 }
 
-function New-GSheet
+function New-GSheetSpreadSheet
 {
     <#
         .Synopsis
-            Create a new Google Sheet.
+            Create a new Google SpreadSheet.
         
         .DESCRIPTION
-            Create a new Google Sheet.
+            Create a new Google SpreadSheet.
         
         .PARAMETER title
             Use this in the simplest case to just create a new sheet with a Title/name
@@ -631,28 +682,28 @@ function New-GSheet
     {
         $uri = "https://sheets.googleapis.com/v4/spreadsheets"
         $ContentType = "application/json"
-        $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
     }
-    End
-    {
-    return([array]$data)
-    }
+    End{}
 }
 
-function Remove-GSheet
+function Remove-GSheetSheet
 {
     <#
         .Synopsis
-        Removes a sheet from a spreadsheet based on sheetID
+            Removes a sheet from a spreadsheet based on sheetID
+
         .DESCRIPTION
             This function will delete a sheet.
-        .EXAMPLE
-            $pageID = 0  ## using pageID to differentiate from sheetID -- 
-            In this case, index 0 is the actual sheetID per the API and will be deleted.
 
-            $sheetID = ## the id number of the file/spreadsheet
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
-            remove-gsheet -pageID $pageID -sheetID $sheetID -accessToken $accessToken
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name of sheet to delete
 
         .EXAMPLE
         
@@ -661,25 +712,21 @@ function Remove-GSheet
     Param
     (
         [Parameter(Mandatory)]
-        [string]$pageID,
-        
+        [string]$spreadSheetID,
+
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$sheetName,
 
         [Parameter(Mandatory)]
         [string]$accessToken
     )
 
-    Begin
-    {
-        If (!$properties)
-            {
-            $properties = @{requests=@(@{deleteSheet=@{sheetId=$pageID}})} |convertto-json -Depth 10
-            }
-    }
+    Begin{}
     Process
     {
-        $suffix = "$sheetID" + ":batchUpdate"
+        $sheetID = Get-GSheetSheetIndex -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+        $properties = @{requests=@(@{deleteSheet=@{sheetId=$sheetID}})} |convertto-json -Depth 10
+        $suffix = "$spreadSheetID" + ":batchUpdate"
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
         $ContentType = "application/json"
         $data = Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
@@ -694,9 +741,20 @@ function Set-GSheetData
 {
     <#
         .Synopsis
-        Set values in sheet in specific cell locations or append data to a sheet
+            Set values in sheet in specific cell locations or append data to a sheet
+
         .DESCRIPTION
-        Long description
+            Set values in sheet in specific cell locations or append data to a sheet
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name of sheet to set data in
+
         .EXAMPLE
         Set-GSheetData -sheetID '1LvqbZSTlgQNIBC2bkv9Ze6nFWPBY98ASI2_sMc1DQSE' -accessToken $accessToken -sheetName 'Sheet1' -rangeA1 'A19:B20' -values @(@("a","b"),@("c","D"))
         .EXAMPLE
@@ -706,7 +764,7 @@ function Set-GSheetData
     Param
     (
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$spreadSheetID,
 
         [Parameter(Mandatory)]
         [string]$accessToken,
@@ -730,20 +788,18 @@ function Set-GSheetData
 
     )
 
-    Begin
-    {
-    }
+    Begin{}
     Process
     {
         if ($append)
         {
             $method = 'POST'
-            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName"+":append?valueInputOption=$valueInputOption"
+            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID/values/$sheetName"+":append?valueInputOption=$valueInputOption"
         }
         else
         {
             $method = 'PUT'
-            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$sheetID/values/$sheetName!$rangeA1"+"?valueInputOption=$valueInputOption"
+            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID/values/$sheetName!$rangeA1"+"?valueInputOption=$valueInputOption"
         }
         $json = @{values=$values} | ConvertTo-Json
         ###### uncomment the following two lines for debug
@@ -754,12 +810,10 @@ function Set-GSheetData
         Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
         
     }
-    End
-    {
-    }
+    End{}
 }
 
-function Set-GSheetPermissions
+function Set-GSheetSpreadSheetPermissions
 {
     <#
         .Synopsis
@@ -771,7 +825,7 @@ function Set-GSheetPermissions
         .PARAMETER emailAddress
             Email address of the user or group to grant permissions to
         
-        .PARAMETER sheetID
+        .PARAMETER spreadSheetID
             The sheetID to apply permissions to.  This is returned when a new sheet is created or use Get-GSheetID
 
         .PARAMETER role
@@ -791,7 +845,7 @@ function Set-GSheetPermissions
 
         #[Alias("fileID")]
         [Parameter(Mandatory)]
-        [string]$sheetID,
+        [string]$spreadSheetID,
 
         [ValidateSet('writer','reader','commenter')]
         [string]$role = "writer",
@@ -801,22 +855,17 @@ function Set-GSheetPermissions
  
     )
 
-    Begin
-    {
-    }
+    Begin{}
     Process
     {
-        $fileID = $sheetID
+        $fileID = $spreadSheetID
         $json = @{emailAddress=$emailAddress;type=$type;role=$role} | ConvertTo-Json
         $ContentType = "application/json"
         $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
         
         Invoke-RestMethod -Method post -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
     }
-    End
-    {
-        return([array]$data)
-    }
+    End{}
 }
 
 ##########################################################################################################################
