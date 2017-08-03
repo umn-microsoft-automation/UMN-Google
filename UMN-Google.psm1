@@ -436,6 +436,7 @@ function Get-GSheetSpreadSheetID
     Param
     (
         [Parameter(Mandatory)]
+        [Alias("spreadSheetName")] 
         [string]$fileName,
 
         [Parameter(Mandatory)]
@@ -735,6 +736,43 @@ function Remove-GSheetSheet
     {
     return([array]$data)
     }
+}
+
+function Remove-GSheetSpreadSheet
+{
+    <#
+        .Synopsis
+            Delete a SpreadSheet
+
+        .DESCRIPTION
+            Delete a SpreadSheet
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .EXAMPLE
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$spreadSheetID,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
+
+    )
+
+    Begin{}
+    Process
+    {
+        $uri = "https://www.googleapis.com/drive/v3/files/$spreadSheetID"
+        Invoke-RestMethod -Method Delete -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End{}
 }
 
 function Set-GSheetData
