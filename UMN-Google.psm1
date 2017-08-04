@@ -325,7 +325,7 @@ function Clear-GSheetSheet
     Begin{}
     Process
     {
-        $sheetID = Get-GSheetSheetIndex -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+        $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
         $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$sheetID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
         $suffix = "$spreadSheetID" + ":batchUpdate"
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
@@ -456,14 +456,14 @@ function Get-GSheetSpreadSheetID
     End{}
 }
 
-function Get-GSheetSheetIndex
+function Get-GSheetSheetID
 {
     <#
         .Synopsis
-            Get Index of specific sheet in a Spreadsheet
+            Get ID of specific sheet in a Spreadsheet
 
         .DESCRIPTION
-         Get Index of specific sheet in a Spreadsheet
+         Get ID of specific sheet in a Spreadsheet
 
         .PARAMETER spreadSheetID
             ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
@@ -472,7 +472,7 @@ function Get-GSheetSheetIndex
             access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
         .PARAMETER sheetName
-            Name of sheet used to fetch the Index
+            Name of sheet used to fetch the ID
   
     #>
     [CmdletBinding()]
@@ -492,7 +492,7 @@ function Get-GSheetSheetIndex
     Process
     {
         $spreadSheet = Get-GSheetSpreadSheetProperties -spreadSheetID $spreadSheetID -accessToken $accessToken
-        ($spreadSheet.sheets.properties | Where-Object {$_.title -eq $sheetName}).index
+        ($spreadSheet.sheets.properties | Where-Object {$_.title -eq $sheetName}).sheetID
     }
     End{}
 }
@@ -598,7 +598,7 @@ function Move-GSheetData
     Process
     {
         ## Query all data from sheet
-        $data = Get-GSheetData -spreadSheetID $spreadSheetID-accessToken $accessToken -sheetName $sourceSheetName -cell AllData
+        $data = Get-GSheetData -spreadSheetID $spreadSheetID -accessToken $accessToken -sheetName $sourceSheetName -cell AllData
         $destinationData = Get-GSheetData -spreadSheetID $spreadSheetID -accessToken $accessToken -sheetName $destinationSheetName -cell AllData
 
         ## Get row query belongs to
