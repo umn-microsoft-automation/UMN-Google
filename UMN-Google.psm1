@@ -606,7 +606,7 @@ function Move-GSheetData
         
         ## Sanity Check - is this the data?
         if (!$Index) {write-host "$Query in $columnKey does not exist"
-            break}
+            return}
         Else {
         $rowIndex = $index[0] + 2    
         $startRow = $Index[0] + 1
