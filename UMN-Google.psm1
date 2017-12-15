@@ -538,39 +538,42 @@ function Move-GSheetData
 {
     <#
         .Synopsis
-            'Move' data around
+            'Move' data around 
         .DESCRIPTION
             This is a cut and paste between sheets in a spreadsheet.
-            The function will find the row index based on search criteria, and move between the sheets provided.
+            The function will find the row index based on search criteria, and copy/paste between the sheets provided.
         
         .PARAMETER spreadSheetID
             ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
         .PARAMETER accessToken
-            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+            oAuth access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
         .PARAMETER currentSheetName
-            Name of sheet to be coppied
+            Name of sheet to be searched, and copied from.
 
         .PARAMETER newSheetName
-            Name for new sheet
+            Name of destination sheet data is to be written to.
 
         .PARAMETER query
+            Value to be queried for in specified column (see columnKey)
 
         .PARAMETER columnKey
-        
+            Row 0 column value. A key to search for data by.
+
         .EXAMPLE
             $newSheetName = 'Decommissioned'
             $currentSheetName = 'Servers'
-            $sheetID = get-GSheetID -FileName 'MPT-ServerDoco'
-            $columnKey = 'Server name' # value based on column name to search
-            $query = 'test1124' # Key item in column to search for. Such as the server's name
+            $sheetID = get-GSheetID -FileName 'Server-Inventory'
+            $columnKey = 'Server name'
+            $query = 'server-dev1'
             $accessToken = Get-GOAuthTokenService -scope $scope -certPath $certPath -certPswd $certPswd -iss $iss
 
             move-gsheetData -sheetID $sheetID -accessToken $accessToken -CurrentSheetName $currentSheetName -newSheetName $newSheetName -query $query -columnKey $columnKey
         .EXAMPLE
             move-GSheetData -sheetID $sheetID -accessToken $accessToken -currentSheetName 'Servers' -newSheetName 'Decommissioned' -query 'Virt-vum-dev' -columnKey 'Server name'
     #>
+
     [CmdletBinding()]
     Param
     (
@@ -591,10 +594,10 @@ function Move-GSheetData
 
         [Parameter(Mandatory)]
         [string]$columnKey
-
     )
 
     Begin{}
+
     Process
     {
         ## Query all data from sheet
@@ -605,8 +608,11 @@ function Move-GSheetData
         $Index = (0..($data.count -1) | where {$Data[$_].$columnKey -eq $query})
         
         ## Sanity Check - is this the data?
-        if (!$Index) {write-host "$Query in $columnKey does not exist"
-            break}
+        if (-not $Index) {
+            write-Warning "$Query in $columnKey does not exist"
+            return $null
+            }
+
         Else {
         $rowIndex = $index[0] + 2    
         $startRow = $Index[0] + 1
@@ -634,6 +640,7 @@ function Move-GSheetData
         Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
         
     }
+    
     End{}
 }
 
