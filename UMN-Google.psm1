@@ -788,6 +788,63 @@ function Remove-GSheetSpreadSheet
     End{}
 }
 
+function Set-GSheetColumnWidth
+{
+    <#
+        .Synopsis
+            Set the width of a column on a sheet
+
+        .DESCRIPTION
+            This function will set dimensions to 'autoResize'
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER sheetName
+            Name of sheet in spreadSheet
+
+        .PARAMETER numberOfColumns
+            An optional parameter to specify how many columns to autosize. Default to 26
+
+        .EXAMPLE
+            Set-GSheetColumnWidth -spreadSheetID $id -sheetName 'Sheet1' -accessToken $token -numberOfColumns ($property.count)
+
+        
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$spreadSheetID,
+        
+        [Parameter(Mandatory)]
+        [string]$sheetName,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [string]$numberOfColumns = '26'
+            
+    )
+
+    Begin{
+    $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+    $json = @{requests=@(@{autoResizeDimensions=@{dimensions=@{sheetId=$sheetID;dimension='COLUMNS';startIndex='0';endIndex='26'}}})} |ConvertTo-Json -Depth 20
+    $suffix = "$spreadSheetID" + ":batchUpdate"
+    $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+    }
+
+    Process
+    {
+        Invoke-RestMethod -Method Post -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End{}
+}
+
+
 function Set-GSheetData
 {
     <#
