@@ -335,6 +335,47 @@ function Clear-GSheetSheet
     End{}
 }
 
+function Get-GFilePermissions
+{
+    <#
+        .Synopsis
+            Get Permissions on Google Drive File
+
+        .DESCRIPTION
+            Get Permission ID list on Google File
+      
+        .PARAMETER fileID
+            The fileID to query.  This is returned when a new file is created.
+
+        .PARAMETER accessToken
+            OAuth Access Token for authorization.
+        .EXAMPLE
+            Get-GFilePermissions -fileID 'String of File ID'
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        #[Alias("spreadSheeID")]
+        [Parameter(Mandatory)]
+        [string]$fileID,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken
+
+    )
+
+    Begin{
+        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+
+    Process
+    {
+        Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
+    }
+    End{}
+}
+
 function Get-GSheetData
 {
     <#
@@ -844,7 +885,6 @@ function Set-GSheetColumnWidth
     End{}
 }
 
-
 function Set-GSheetData
 {
     <#
@@ -945,6 +985,9 @@ function Set-GSheetSpreadSheetPermissions
         .PARAMETER accessToken
             access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
+        .PARAMETER sendNotificationEmail
+            Boolean response on sending email notification.
+
         .EXAMPLE
             set-GSheetPermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
     #>
@@ -965,22 +1008,93 @@ function Set-GSheetSpreadSheetPermissions
         [string]$type,
 
         [Parameter(Mandatory)]
-        [string]$accessToken
- 
+        [string]$accessToken,
+
+        [ValidateSet($true,$false)]
+        [boolean]$sendNotificationEmail = $false
     )
 
-    Begin{}
-    Process
-    {
+    Begin{
         $fileID = $spreadSheetID
         $json = @{emailAddress=$emailAddress;type=$type;role=$role} | ConvertTo-Json
         $ContentType = "application/json"
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
-        
-        Invoke-RestMethod -Method post -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
+        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?sendNotificationEmail=$sendNotificationEmail"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+    Process
+    {
+        Invoke-RestMethod -Method post -Uri $uri -Body $json -ContentType $ContentType -Headers $headers
     }
     End{}
 }
 
+function Update-GFilePermissions
+{
+    <#
+        .Synopsis
+            Update Permissions on Google File
+
+        .DESCRIPTION
+            Update Permissions on Google File
+     
+        .PARAMETER fileID
+            The sheetID to apply permissions to.  This is returned when a new sheet is created or use Get-GSheetID
+
+        .PARAMETER role
+            Role to assign, select from 'writer','reader','commenter','Owner','Organizer'
+
+        .PARAMETER permissionID
+            The permission ID of the entiry with permissions. Sett Get-GFilePermissions to get a lsit
+        
+        .PARAMETER transferOwnership
+            Update ownership of file to permission ID
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER supportTeamDrives
+            Boolean for TeamDrive Support
+
+        .EXAMPLE
+            Update-GSheetPermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        #[Alias("spreadSheetID")]
+        [Parameter(Mandatory)]
+        [string]$fileID,
+
+        [ValidateSet('writer','reader','commenter','owner','organizer')]
+        [string]$role = "writer",
+
+        [Parameter(Mandatory)]
+        [string]$permissionID,
+
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [ValidateSet($true,$false)]
+        [string]$transferOwnership = $false,
+
+        [ValidateSet($true,$false)]
+        [string]$supportTeamDrives = $false
+
+ 
+    )
+
+    Begin{
+        $json = @{role=$role} | ConvertTo-Json
+        $ContentType = "application/json"
+        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/$permissionID/?transferOwnership=$transferOwnership"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+    Process
+    {
+
+        Invoke-RestMethod -Method Patch -Uri $uri -Body $json -ContentType $ContentType -Headers $headers
+    }
+    End{}
+}
 ##########################################################################################################################
 Export-ModuleMember -Function *
