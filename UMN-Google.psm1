@@ -66,6 +66,98 @@ function ConvertTo-Base64URL
 
 #region oAuth 2.0
 
+function Get-GOAuthTokenService
+{
+    <#
+        .Synopsis
+            Get google auth 2.0 token for a service account
+
+        .DESCRIPTION
+            This is used in server-server OAuth token generation
+        
+        .PARAMETER certPath
+            Local or network path to .p12 used to sign the JWT token
+
+        .PARAMETER certPswd
+            Password to access the private key in the .p12
+
+        .PARAMETER iss
+            This is the Google Service account address
+
+        .PARAMATER scope
+            The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+                
+        .EXAMPLE
+            Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
+
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$certPath,
+
+        [Parameter(Mandatory)]
+        [string]$certPswd,
+
+        [Parameter(Mandatory)]
+        [string]$iss,
+        
+        [Parameter(Mandatory)]
+        [string]$scope
+    )
+
+    Begin
+    {
+        # build JWT header
+        $headerJSON = [Ordered]@{
+            alg = "RS256"
+            typ = "JWT"
+        } | ConvertTo-Json -Compress
+        $headerBase64 = ConvertTo-Base64URL -text $headerJSON
+    }
+    Process
+    {        
+        # Build claims for JWT
+        $now = (Get-Date).ToUniversalTime()
+        $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
+        $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s")) 
+        $aud = "https://www.googleapis.com/oauth2/v4/token"
+        $claimsJSON = [Ordered]@{
+            iss = $iss
+            scope = $scope
+            aud = $aud
+            exp = $exp
+            iat = $iat
+        } | ConvertTo-Json -Compress
+
+        $claimsBase64 = ConvertTo-Base64URL -text $claimsJSON
+
+        ################# Create JWT
+        # Prep JWT certificate signing
+        $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
+        $rsaPrivate = $googleCert.PrivateKey 
+        $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
+        $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
+        
+        # Signature is our base64urlencoded header and claims, delimited by a period. 
+        $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
+        $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
+        
+        # Build request
+        $jwt = $headerBase64 + "." + $claimsBase64 + "." + $signature
+        $fields = 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+$jwt
+
+        # Fetch token
+        $response = Invoke-RestMethod -Uri "https://www.googleapis.com/oauth2/v4/token" -Method Post -Body $fields -ContentType "application/x-www-form-urlencoded"
+
+    }
+    End
+    {
+        return $response.access_token
+    }
+}
+
 function Get-GOAuthTokenUser
 {
     <#
@@ -173,98 +265,6 @@ function Get-GOAuthTokenUser
     End
     {
         return new-object psobject -Property $props
-    }
-}
-
-function Get-GOAuthTokenService
-{
-    <#
-        .Synopsis
-            Get google auth 2.0 token for a service account
-
-        .DESCRIPTION
-            This is used in server-server OAuth token generation
-        
-        .PARAMETER certPath
-            Local or network path to .p12 used to sign the JWT token
-
-        .PARAMETER certPswd
-            Password to access the private key in the .p12
-
-        .PARAMETER iss
-            This is the Google Service account address
-
-        .PARAMATER scope
-            The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
-                
-        .EXAMPLE
-            Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
-
-    #>
-    [CmdletBinding()]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$certPath,
-
-        [Parameter(Mandatory)]
-        [string]$certPswd,
-
-        [Parameter(Mandatory)]
-        [string]$iss,
-        
-        [Parameter(Mandatory)]
-        [string]$scope
-    )
-
-    Begin
-    {
-        # build JWT header
-        $headerJSON = [Ordered]@{
-            alg = "RS256"
-            typ = "JWT"
-        } | ConvertTo-Json -Compress
-        $headerBase64 = ConvertTo-Base64URL -text $headerJSON
-    }
-    Process
-    {        
-        # Build claims for JWT
-        $now = (Get-Date).ToUniversalTime()
-        $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-        $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s")) 
-        $aud = "https://www.googleapis.com/oauth2/v4/token"
-        $claimsJSON = [Ordered]@{
-            iss = $iss
-            scope = $scope
-            aud = $aud
-            exp = $exp
-            iat = $iat
-        } | ConvertTo-Json -Compress
-
-        $claimsBase64 = ConvertTo-Base64URL -text $claimsJSON
-
-        ################# Create JWT
-        # Prep JWT certificate signing
-        $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
-        $rsaPrivate = $googleCert.PrivateKey 
-        $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
-        $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
-        
-        # Signature is our base64urlencoded header and claims, delimited by a period. 
-        $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
-        $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
-        
-        # Build request
-        $jwt = $headerBase64 + "." + $claimsBase64 + "." + $signature
-        $fields = 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+$jwt
-
-        # Fetch token
-        $response = Invoke-RestMethod -Uri "https://www.googleapis.com/oauth2/v4/token" -Method Post -Body $fields -ContentType "application/x-www-form-urlencoded"
-
-    }
-    End
-    {
-        return $response.access_token
     }
 }
 
@@ -756,7 +756,7 @@ function Get-GSheetSpreadSheetID
             Get a spreadsheet ID.
 
         .DESCRIPTION
-            Provide a case sensative sheet name to the function to get back the sheetID used in many other API calls.
+            Provide a case sensative file name to the function to get back the sheetID used in many other API calls.
             mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
 
         .PARAMETER accessToken
@@ -1026,7 +1026,7 @@ function Remove-GSheetSheet
     Begin{}
     Process
     {
-        $sheetID = Get-GSheetSheetIndex -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+        $sheetID = Get-GSheetSheetID -accessToken $accessToken -sheetName $sheetName -spreadSheetID $spreadSheetID
         $properties = @{requests=@(@{deleteSheet=@{sheetId=$sheetID}})} |convertto-json -Depth 10
         $suffix = "$spreadSheetID" + ":batchUpdate"
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
