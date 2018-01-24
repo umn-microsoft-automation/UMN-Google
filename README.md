@@ -1,4 +1,14 @@
 # UMN-Google
+
+Update '1.1.0'
+
+Organized all functions.
+Added parameter listing to every function.
+Updated help files for every function.
+Distinguished between 'fileID' and 'spreadSheetID' -- these are the same, but require different API when taking certain actions.
+
+
+------------------------------------------------
 Current Functions revolve around working with Google Sheets.  Based of API docs https://developers.google.com/sheets/
 
 Set-up: Create a project https://console.developers.google.com/apis/dashboard
