@@ -314,6 +314,62 @@ function Get-GFilePermissions
     End{}
 }
 
+function Move-GFile
+{
+    <#
+        .Synopsis
+            Change parent folder metadata
+
+        .DESCRIPTION
+            A function to change parent folder metadata of a file.
+
+        .PARAMETER accessToken
+            OAuth Access Token for authorization.
+                  
+        .PARAMETER fileID
+            The fileID to move.
+
+        .PARAMETER folderID
+            The fileID of the new parent folder.
+
+        .PARAMETER parentFolderID
+            The fileID of the parentFolder. Optional parameter. root (My Drive) is assumed if not specified.
+
+        .EXAMPLE
+            MoveGFile -fileID 'String of File ID' -folderID 'String of folder's File ID'
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        #[Alias("spreadSheetID")]
+        [Parameter(Mandatory)]
+        [string]$fileID,
+
+        [Parameter(Mandatory)]
+        [string]$folderID,
+
+        [string]$parentFolderID='root'
+    )
+
+    Begin
+    {
+        $uriAdd = "https://www.googleapis.com/drive/v3/files/$fileID"+"?removeParents=$parentFolderID"
+        $uriRemove = "https://www.googleapis.com/drive/v3/files/$fileID"+"?addParents=$folderID"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+
+    Process
+    {
+        Invoke-RestMethod -Method patch -Uri $uriAdd -Headers $headers
+
+        Invoke-RestMethod -Method patch -Uri $uriRemove -Headers $headers
+    }
+    End{}
+}
+
 function Remove-GFilePermissions
 {
     <#
