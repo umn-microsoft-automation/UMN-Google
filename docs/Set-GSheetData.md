@@ -15,13 +15,13 @@ Set values in sheet in specific cell locations or append data to a sheet
 ### Append
 ```
 Set-GSheetData -accessToken <String> [-append] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList> [<CommonParameters>]
+ [-valueInputOption <String>] -values <ArrayList>
 ```
 
 ### set
 ```
 Set-GSheetData -accessToken <String> [-rangeA1 <String>] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList> [<CommonParameters>]
+ [-valueInputOption <String>] -values <ArrayList>
 ```
 
 ## DESCRIPTION
@@ -152,9 +152,6 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
