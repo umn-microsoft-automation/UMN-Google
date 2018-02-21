@@ -14,7 +14,7 @@ Update Permissions on Google File
 
 ```
 Update-GFilePermissions [-accessToken] <String> [-fileID] <String> [-permissionID] <String> [[-role] <String>]
- [[-supportTeamDrives] <String>] [[-transferOwnership] <String>] [<CommonParameters>]
+ [[-supportTeamDrives] <String>] [[-transferOwnership] <String>]
 ```
 
 ## DESCRIPTION
@@ -121,9 +121,6 @@ Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

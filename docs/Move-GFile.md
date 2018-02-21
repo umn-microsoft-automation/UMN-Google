@@ -5,32 +5,31 @@ online version:
 schema: 2.0.0
 ---
 
-# Remove-GSheetSheet
+# Move-GFile
 
 ## SYNOPSIS
-Removes a sheet from a spreadsheet based on sheetID
+Change parent folder metadata
 
 ## SYNTAX
 
 ```
-Remove-GSheetSheet [-accessToken] <String> [-sheetName] <String> [-spreadSheetID] <String>
+Move-GFile [-accessToken] <String> [-fileID] <String> [-folderID] <String> [[-parentFolderID] <String>]
 ```
 
 ## DESCRIPTION
-This function will delete an individual sheet.
+A function to change parent folder metadata of a file.
 
 ## EXAMPLES
 
 ### -------------------------- EXAMPLE 1 --------------------------
 ```
-Remove-GSheetSheet -accessToken $accessToken -sheetName 'Name to delete' -spreadSheetID $spreadSheetID
+MoveGFile -fileID 'String of File ID' -folderID 'String of folder's File ID'
 ```
 
 ## PARAMETERS
 
 ### -accessToken
-access token used for authentication. 
-Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+OAuth Access Token for authorization.
 
 ```yaml
 Type: String
@@ -44,8 +43,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -sheetName
-Name of sheet to delete
+### -fileID
+The fileID to move.
 
 ```yaml
 Type: String
@@ -59,9 +58,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -spreadSheetID
-ID for the target Spreadsheet. 
-This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+### -folderID
+The fileID of the new parent folder.
 
 ```yaml
 Type: String
@@ -71,6 +69,23 @@ Aliases:
 Required: True
 Position: 3
 Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -parentFolderID
+The fileID of the parentFolder.
+Optional parameter.
+root (My Drive) is assumed if not specified.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: 
+
+Required: False
+Position: 4
+Default value: Root
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

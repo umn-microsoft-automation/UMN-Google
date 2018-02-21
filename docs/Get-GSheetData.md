@@ -14,7 +14,7 @@ Basic function for retrieving data from a specific Sheet in a Google SpreadSheet
 
 ```
 Get-GSheetData [-accessToken] <String> [-cell] <String> [[-rangeA1] <String>] [-sheetName] <String>
- [-spreadSheetID] <String> [[-valueRenderOption] <String>] [<CommonParameters>]
+ [-spreadSheetID] <String> [[-valueRenderOption] <String>]
 ```
 
 ## DESCRIPTION
@@ -127,9 +127,6 @@ Default value: FORMATTED_VALUE
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

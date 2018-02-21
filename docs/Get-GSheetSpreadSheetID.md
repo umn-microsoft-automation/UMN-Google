@@ -13,11 +13,11 @@ Get a spreadsheet ID.
 ## SYNTAX
 
 ```
-Get-GSheetSpreadSheetID [-accessToken] <String> [-fileName] <String> [<CommonParameters>]
+Get-GSheetSpreadSheetID [-accessToken] <String> [-fileName] <String>
 ```
 
 ## DESCRIPTION
-Provide a case sensative sheet name to the function to get back the sheetID used in many other API calls.
+Provide a case sensative file name to the function to get back the sheetID used in many other API calls.
 mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
 
 ## EXAMPLES
@@ -60,9 +60,6 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
