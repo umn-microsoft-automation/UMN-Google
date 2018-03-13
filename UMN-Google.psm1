@@ -405,7 +405,7 @@ function Remove-GFilePermissions
         [string]$fileID,
         
         [Parameter(Mandatory)]
-        [string]$permissionsID
+        [string]$permissionID
 
     )
 
