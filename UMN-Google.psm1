@@ -1247,7 +1247,7 @@ function Set-GSheetData
 
         [Parameter(Mandatory)]
         [System.Collections.ArrayList]$values
-)
+    )
 
     Begin
     {
@@ -1272,6 +1272,109 @@ function Set-GSheetData
     End{}
 }
 
+#region Set-GSheetDropDownList
+    function Set-GSheetDropDownList
+    {
+        <#
+            .Synopsis
+                Set Drop Down List Data validation on cells in a column
+
+            .DESCRIPTION
+                Set Drop Down List Data validation on cells in a column
+
+            .PARAMETER accessToken
+                access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+            .PARAMETER columnIndex
+                Index of column to update
+
+            .PARAMETER startRowIndex
+                Index of row to start updating
+            
+            .PARAMETER endRowIndex
+                Index of last row to update
+
+            .PARAMETER values
+                List of string values that the use can chose from in an array.  Google API only takes strings
+
+            .PARAMETER inputMessage
+                A message to show the user when adding data to the cell.
+
+            .PARAMETER showCustomUi
+                True if the UI should be customized based on the kind of condition. If true, $values will show a dropdown.
+
+            .PARAMETER sheetName
+                Name of sheet in spreadSheet
+
+            .PARAMETER spreadSheetID
+                ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+            .EXAMPLE Set-GSheetDropDownList -accessToken $accessToken -startRowIndex 1 -endRowIndex 10 -columnIndex 9 -sheetName 'Sheet1' -spreadSheetID $spreadSheetID -inputMessage "Must be one of 'Public','Private Restricted','Private, Highly-Restricted'" -values @('Public','Private Restricted','Private, Highly-Restricted')
+                
+            
+        #>
+        [CmdletBinding()]
+        Param
+        (
+            [Parameter(Mandatory)]
+            [string]$accessToken,
+            
+            [Parameter(Mandatory)]
+            [int]$startRowIndex,
+
+            [Parameter(Mandatory)]
+            [int]$endRowIndex,
+
+            [Parameter(Mandatory)]
+            [int]$columnIndex,
+
+            [Parameter(Mandatory)]
+            [string]$sheetName,
+
+            [Parameter(Mandatory)]
+            [string]$spreadSheetID,
+
+            [Parameter(Mandatory)]
+            [string[]]$values,
+
+            [string]$inputMessage,
+
+            [boolean]$showCustomUi=$true
+
+        )
+
+        Begin
+        {
+            $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+            $valueList = [Collections.ArrayList]@()
+            foreach ($value in $values){$valueList.Add(@{userEnteredValue=$value})}
+            $validation = @{
+                setDataValidation = @{
+                    range=@{sheetId = $sheetID;startRowIndex=$startRowIndex;endRowIndex=$endRowIndex;startColumnIndex=$columnIndex;endColumnIndex=($columnIndex+1)};
+                    rule=@{
+                        condition = @{
+                            type= 'ONE_OF_LIST';
+                            values=$valueList
+                        };
+                        inputMessage=$inputMessage;strict=$true;showCustomUi=$showCustomUi
+                    }
+                }
+            }
+            $json = @{requests=@($validation)} | ConvertTo-Json -Depth 20
+            $suffix = "$spreadSheetID" + ":batchUpdate"
+            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+            $json
+            $uri
+        }
+
+        Process
+        {
+            Invoke-RestMethod -Method Post -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
+        }
+        
+        End{}
+    }
+#endregion
 #endregion
 
 Export-ModuleMember -Function *
