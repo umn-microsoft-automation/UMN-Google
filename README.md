@@ -1,13 +1,18 @@
 # UMN-Google
 
-Update '1.2.2'
+# Update '1.2.3'
+Add function Set-GSheetDropDownList.  Sets data validation on cells in a column and creates drop down list for users to choose options you specify.
+
+EXAMPLE: Set-GSheetDropDownList -accessToken $accessToken -startRowIndex 1 -endRowIndex 10 -columnIndex 9 -sheetName 'Sheet1' -spreadSheetID $spreadSheetID -inputMessage "Must be one of 'Public','Private Restricted','Private, Highly-Restricted'" -values @('Public','Private Restricted','Private, Highly-Restricted')
+
+# Update '1.2.2'
 Catch up notes. Module is now code signed.
 Fixed plurality typo for remove-gfilepermissions id parameter.
 
-Update '1.1.1'
+# Update '1.1.1'
 Added function to move google drive file.
 
-Update '1.1.0'
+#Update '1.1.0'
 
 Organized all functions.
 Added parameter listing to every function.
