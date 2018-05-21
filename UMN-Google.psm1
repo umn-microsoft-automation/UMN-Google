@@ -1152,7 +1152,7 @@ function Remove-GSheetSheetRowColumn
             Index of row or column to stop deleting
 
         .PARAMETER dimension
-            Rows or Columns
+            Remove Rows or Columns
 
         .PARAMETER sheetName
             Name of sheet in spreadSheet
@@ -1160,8 +1160,7 @@ function Remove-GSheetSheetRowColumn
         .PARAMETER spreadSheetID
             ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
-        .EXAMPLE  -accessToken $accessToken -startRowIndex 1 -endRowIndex 10 -columnIndex 9 -sheetName 'Sheet1' -spreadSheetID $spreadSheetID -inputMessage "Must be one of 'Public','Private Restricted','Private, Highly-Restricted'" -values @('Public','Private Restricted','Private, Highly-Restricted')
-            
+        .EXAMPLE  Remove-GSheetSheetRowColumn -accessToken $accessToken -sheetName "Sheet1" -spreadSheetID $spreadSheetID -dimension ROWS -startIndex 5 -endIndex 10            
         
     #>
     [CmdletBinding()]
@@ -1178,7 +1177,7 @@ function Remove-GSheetSheetRowColumn
 
         [Parameter(Mandatory)]
         [ValidateSet("COLUMNS", "ROWS")]
-        [int]$dimension,
+        [string]$dimension,
 
         [Parameter(Mandatory)]
         [string]$sheetName,
@@ -1190,6 +1189,7 @@ function Remove-GSheetSheetRowColumn
     Begin
     {
         $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+        if ($startIndex -eq $endIndex){$endIndex++}
     }
 
     Process
