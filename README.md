@@ -13,7 +13,7 @@ Catch up notes. Module is now code signed.
 Fixed plurality typo for remove-gfilepermissions id parameter.
 
 ## Update '1.1.1'
-Added function to move google drive file.
+Added function to move google drive file. 
 
 ## Update '1.1.0'
 
