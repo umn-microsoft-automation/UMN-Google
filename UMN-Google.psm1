@@ -1199,7 +1199,7 @@ function Remove-GSheetSheetRowColumn
         $suffix = "$spreadSheetID" + ":batchUpdate"
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
         write-verbose -Message $json
-        #Invoke-RestMethod -Method Post -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
+        Invoke-RestMethod -Method Post -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
     }
     
     End{}
