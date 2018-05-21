@@ -1,6 +1,6 @@
 # UMN-Google
 
-## Update '1.2.4'
+## Update '1.2.5'
 Add function Remove-GSheetSheetRowColumn.  Removes one or more rows or columns
 
 ## Update '1.2.3'
