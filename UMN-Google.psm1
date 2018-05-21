@@ -1132,6 +1132,79 @@ function Remove-GSheetSpreadSheet
     End{}
 }
 
+#region Remove-GSheetSheetRowColumn
+function Remove-GSheetSheetRowColumn
+{
+    <#
+        .Synopsis
+            Remove row(s) or column(s)
+
+        .DESCRIPTION
+            Remove row(s) or column(s)
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER startIndex
+            Index of row or column to start deleting
+
+        .PARAMETER endIndex
+            Index of row or column to stop deleting
+
+        .PARAMETER dimension
+            Rows or Columns
+
+        .PARAMETER sheetName
+            Name of sheet in spreadSheet
+
+        .PARAMETER spreadSheetID
+            ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+
+        .EXAMPLE  -accessToken $accessToken -startRowIndex 1 -endRowIndex 10 -columnIndex 9 -sheetName 'Sheet1' -spreadSheetID $spreadSheetID -inputMessage "Must be one of 'Public','Private Restricted','Private, Highly-Restricted'" -values @('Public','Private Restricted','Private, Highly-Restricted')
+            
+        
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+        
+        [Parameter(Mandatory)]
+        [int]$startIndex,
+
+        [Parameter(Mandatory)]
+        [int]$endIndex,
+
+        [Parameter(Mandatory)]
+        [ValidateSet("COLUMNS", "ROWS")]
+        [int]$dimension,
+
+        [Parameter(Mandatory)]
+        [string]$sheetName,
+
+        [Parameter(Mandatory)]
+        [string]$spreadSheetID
+    )
+
+    Begin
+    {
+        $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+    }
+
+    Process
+    {
+        $request = @{"deleteDimension" = @{"range" = @{"sheetId" = $sheetID; "dimension" = $dimension; "startIndex" = $startIndex; "endIndex" = $endIndex}}}
+        $json = @{requests=@($request)} | ConvertTo-Json -Depth 20
+        $suffix = "$spreadSheetID" + ":batchUpdate"
+        $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
+        write-verbose -Message $json
+        #Invoke-RestMethod -Method Post -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    
+    End{}
+}
+#endregion
 function Set-GSheetColumnWidth
 {
     <#
@@ -1374,7 +1447,6 @@ function Set-GSheetData
         
         End{}
     }
-#endregion
 #endregion
 
 Export-ModuleMember -Function *
