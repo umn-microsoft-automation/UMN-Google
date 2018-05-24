@@ -1,5 +1,10 @@
 # UMN-Google
 
+## Update '1.2.6'
+Add functions Get-GFileID and Get-GFile'
+Get-GFileID with fetch the ID of any file in Drive that you have access to.  This can then be feed into other functions
+Get-GFile can be used to download a file from Drive.  Future releases will support converting Google Docs to other formats as provided by the Google API
+
 ## Update '1.2.5'
 Add function Remove-GSheetSheetRowColumn.  Removes one or more rows or columns
 

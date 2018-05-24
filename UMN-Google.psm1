@@ -270,6 +270,67 @@ function Get-GOAuthTokenUser
 
 #endregion
 
+#region Get-GFile
+function Get-GFile
+{
+    <#
+        .Synopsis
+            Download a Google File.
+
+        .DESCRIPTION
+            Download a Google File based on a case sensative file or fileID.
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER fileName
+            Name of file to retrive ID for. Case sensitive
+        
+        .PARAMETER fileID
+            File ID.  Can be gotten from Get-GFileID
+
+        .PARAMETER outFilePath
+            Path to output file including file name.    
+        
+        .EXAMPLE
+            Get-GFile -accessToken $accessToken -fileName 'Name of some file'
+
+        .EXAMPLE
+            Get-GFile -accessToken $accessToken -fileID 'ID of some file'
+
+        .NOTES
+            Written by Travis Sobeck
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [Parameter(ParameterSetName='fileName')]
+        [string]$fileName,
+
+        [Parameter(ParameterSetName='fileID')]
+        [string]$fileID,
+
+        [Parameter(Mandatory)]
+        [string]$outFilePath
+
+        #[string]$mimetype
+    )
+
+    Begin{}
+    Process
+    {
+        if ($fileName){$fileID = Get-GFileID -accessToken $accessToken -fileName $fileName}
+        If ($fileID.count -eq 0 -or $fileID.count -gt 1){break}
+        $uri = "https://www.googleapis.com/drive/v3/files/$($fileID)?alt=media"
+        Invoke-RestMethod -Method Get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"} -OutFile $outFilePath
+    }
+    End{}
+}
+#endregion 
+
 #region Get-GFileID
 function Get-GFileID
 {
@@ -290,6 +351,9 @@ function Get-GFileID
             Use this to specify a specific mimetype.  See google docs https://developers.google.com/drive/api/v3/search-parameters
         .EXAMPLE
             Get-GFileID -accessToken $accessToken -fileName 'Name of some file'
+
+        .NOTES
+            Written by Travis Sobeck
     #>
     [CmdletBinding()]
     Param
@@ -312,7 +376,7 @@ function Get-GFileID
         
         # Logic on multiple IDs being returned
         If ($fileID.count -eq 0){Write-Warning "There are no files matching the name $fileName"}
-        If ($fileID.count -gt 1){Write-Warning "There are $($fileID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($spreadSheetID)}
+        If ($fileID.count -gt 1){Write-Warning "There are $($fileID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($fileID)}
         Else{return($fileID)}
     }
     End{}
@@ -854,43 +918,45 @@ function Get-GSheetSheetID
     End{}
 }
 
-function Get-GSheetSpreadSheetID
-{
-    <#
-        .Synopsis
-            Get a spreadsheet ID.
-
-        .DESCRIPTION
-            Provide a case sensative file name to the function to get back the sheetID used in many other API calls.
-            mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
-
-        .PARAMETER accessToken
-            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
-
-        .PARAMETER fileName
-            Name of file to retrive ID for. Case sensitive
-        
-        .EXAMPLE
-            Get-GSheetSpreadSheetID -accessToken $accessToken -fileName 'Name of some file'
-    #>
-    [CmdletBinding()]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$accessToken,
-        [Parameter(Mandatory)]
-
-        [Alias("spreadSheetName")] 
-        [string]$fileName
-    )
-
-    Begin{}
-    Process
+#region Get-GSheetSpreadSheetID
+    function Get-GSheetSpreadSheetID
     {
-        return (Get-GFileID -accessToken $accessToken -fileName $fileName -mimetype "application/vnd.google-apps.spreadsheet")
+        <#
+            .Synopsis
+                Get a spreadsheet ID.
+
+            .DESCRIPTION
+                Provide a case sensative file name to the function to get back the sheetID used in many other API calls.
+                mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
+
+            .PARAMETER accessToken
+                access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+            .PARAMETER fileName
+                Name of file to retrive ID for. Case sensitive
+            
+            .EXAMPLE
+                Get-GSheetSpreadSheetID -accessToken $accessToken -fileName 'Name of some file'
+        #>
+        [CmdletBinding()]
+        Param
+        (
+            [Parameter(Mandatory)]
+            [string]$accessToken,
+            [Parameter(Mandatory)]
+
+            [Alias("spreadSheetName")] 
+            [string]$fileName
+        )
+
+        Begin{}
+        Process
+        {
+            return (Get-GFileID -accessToken $accessToken -fileName $fileName -mimetype "application/vnd.google-apps.spreadsheet")
+        }
+        End{}
     }
-    End{}
-}
+#endregion
 
 function Get-GSheetSpreadSheetProperties
 {
