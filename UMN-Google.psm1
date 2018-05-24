@@ -270,6 +270,55 @@ function Get-GOAuthTokenUser
 
 #endregion
 
+#region Get-GFileID
+function Get-GFileID
+{
+    <#
+        .Synopsis
+            Get a Google File ID.
+
+        .DESCRIPTION
+            Provide a case sensative file name to the function to get back the gFileID used in many other API calls.
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER fileName
+            Name of file to retrive ID for. Case sensitive
+        
+        .PARAMETER mimetype
+            Use this to specify a specific mimetype.  See google docs https://developers.google.com/drive/api/v3/search-parameters
+        .EXAMPLE
+            Get-GFileID -accessToken $accessToken -fileName 'Name of some file'
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [Parameter(Mandatory)]
+        [string]$fileName,
+
+        [string]$mimetype
+    )
+
+    Begin{}
+    Process
+    {
+        $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
+        if ($mimetype){$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | Where-Object {$_.mimetype -eq $mimetype}).id}
+        else{$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files)).id}
+        
+        # Logic on multiple IDs being returned
+        If ($fileID.count -eq 0){Write-Warning "There are no files matching the name $fileName"}
+        If ($fileID.count -gt 1){Write-Warning "There are $($fileID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($spreadSheetID)}
+        Else{return($fileID)}
+    }
+    End{}
+}
+#endregion 
+
 #region Permissions for Google Drive files
 
 function Get-GFilePermissions
@@ -838,13 +887,7 @@ function Get-GSheetSpreadSheetID
     Begin{}
     Process
     {
-        $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
-        $spreadSheetID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | where {$_.mimetype -eq "application/vnd.google-apps.spreadsheet"}).id
-        
-        # Logic on multiple IDs being returned
-        If ($spreadSheetID.count -eq 0){Write-Warning "There are no files matching the name $fileName"}
-        If ($spreadSheetID.count -gt 1){Write-Warning "There are $($spreadSheetID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($spreadSheetID)}
-        Else{return($spreadSheetID)}
+        return (Get-GFileID -accessToken $accessToken -fileName $fileName -mimetype "application/vnd.google-apps.spreadsheet")
     }
     End{}
 }
