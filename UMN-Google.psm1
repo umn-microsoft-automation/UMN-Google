@@ -881,6 +881,7 @@ function Update-GFilePermissions
     }
 #endregion
 
+#region Get-GSheetSheetID
 function Get-GSheetSheetID
 {
     <#
@@ -923,6 +924,7 @@ function Get-GSheetSheetID
     }
     End{}
 }
+#endregion
 
 #region Get-GSheetSpreadSheetID
     function Get-GSheetSpreadSheetID
@@ -964,6 +966,7 @@ function Get-GSheetSheetID
     }
 #endregion
 
+#region Get-GSheetSpreadSheetProperties
 function Get-GSheetSpreadSheetProperties
 {
     <#
@@ -999,7 +1002,7 @@ function Get-GSheetSpreadSheetProperties
     }
     End{}
 }
-
+#endregion
 function Move-GSheetData
 {
     <#
