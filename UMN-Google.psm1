@@ -416,7 +416,7 @@ function Get-GFilePermissions
 
     Begin
     {
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
+        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?fields=*"
         $headers = @{"Authorization"="Bearer $accessToken"}
     }
 
