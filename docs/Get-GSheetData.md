@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,7 +14,7 @@ Basic function for retrieving data from a specific Sheet in a Google SpreadSheet
 
 ```
 Get-GSheetData [-accessToken] <String> [-cell] <String> [[-rangeA1] <String>] [-sheetName] <String>
- [-spreadSheetID] <String> [[-valueRenderOption] <String>]
+ [-spreadSheetID] <String> [[-valueRenderOption] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -22,12 +22,12 @@ Basic function for retrieving data from a specific Sheet in a Google SpreadSheet
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Get-GSheetData -accessToken $accessToken -cell 'AllData' -sheetName 'Sheet1' -spreadSheetID $spreadSheetID
 ```
 
-### -------------------------- EXAMPLE 2 --------------------------
+### EXAMPLE 2
 ```
 Get-GSheetData -accessToken $accessToken -cell 'Range' -rangeA1 'A0:F77' -sheetName 'Sheet1' -spreadSheetID $spreadSheetID
 ```
@@ -41,7 +41,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -56,7 +56,7 @@ Required switch for getting all data, or a subset of cells.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 2
@@ -72,7 +72,7 @@ The dimensions of the $values you put in MUST fit within this range
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 3
@@ -87,7 +87,7 @@ Name of sheet to data from
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 4
@@ -103,7 +103,7 @@ This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 5
@@ -119,7 +119,7 @@ Switch option from formatted to unformatted data or 'formula'
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 6
@@ -128,6 +128,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -135,4 +138,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

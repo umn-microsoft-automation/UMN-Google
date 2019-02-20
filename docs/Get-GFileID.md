@@ -5,25 +5,25 @@ online version:
 schema: 2.0.0
 ---
 
-# Add-GSheetSheet
+# Get-GFileID
 
 ## SYNOPSIS
-Add named sheets to an existing spreadSheet file.
+Get a Google File ID.
 
 ## SYNTAX
 
 ```
-Add-GSheetSheet [-accessToken] <String> [-sheetName] <String> [-spreadSheetID] <String> [<CommonParameters>]
+Get-GFileID [-accessToken] <String> [-fileName] <String> [[-mimetype] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This function will add a specified sheet name to a google spreadsheet.
+Provide a case sensative file name to the function to get back the gFileID used in many other API calls.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Add-GSheetSheet -accessToken $accessToken -sheetName 'NewName' -spreadSheetID $spreadSheetID
+Get-GFileID -accessToken $accessToken -fileName 'Name of some file'
 ```
 
 ## PARAMETERS
@@ -44,8 +44,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -sheetName
-Name to apply to new sheet
+### -fileName
+Name of file to retrive ID for.
+Case sensitive
 
 ```yaml
 Type: String
@@ -59,16 +60,16 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -spreadSheetID
-ID for the target Spreadsheet. 
-This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
+### -mimetype
+Use this to specify a specific mimetype. 
+See google docs https://developers.google.com/drive/api/v3/search-parameters
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 3
 Default value: None
 Accept pipeline input: False
@@ -76,12 +77,14 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ## OUTPUTS
 
 ## NOTES
+Written by Travis Sobeck
 
 ## RELATED LINKS

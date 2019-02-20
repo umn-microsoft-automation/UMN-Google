@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,7 +14,7 @@ Update Permissions on Google File
 
 ```
 Update-GFilePermissions [-accessToken] <String> [-fileID] <String> [-permissionID] <String> [[-role] <String>]
- [[-supportTeamDrives] <String>] [[-transferOwnership] <String>]
+ [[-supportTeamDrives] <String>] [[-transferOwnership] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -22,7 +22,7 @@ Update Permissions on Google File
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Update-GFilePermissions -emailAddress 'user@email.com' -role writer -fileID $sheetID -permissionID 'ID of the permission'
 ```
@@ -36,7 +36,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -52,7 +52,7 @@ This is returned when a new sheet is created or use Get-GSheetID
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 2
@@ -68,7 +68,7 @@ Sett Get-GFilePermissions to get a lsit
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 3
@@ -83,7 +83,7 @@ Role to assign, select from 'writer','reader','commenter','Owner','Organizer'
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 4
@@ -98,7 +98,7 @@ Boolean for TeamDrive Support
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 5
@@ -113,7 +113,7 @@ Update ownership of file to permission ID
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 6
@@ -121,6 +121,9 @@ Default value: False
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
@@ -131,4 +134,3 @@ This is usefull for changing ownership.
 You cannot change ownership from non-domain to domain.
 
 ## RELATED LINKS
-

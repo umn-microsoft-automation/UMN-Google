@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,6 +14,7 @@ Change parent folder metadata
 
 ```
 Move-GFile [-accessToken] <String> [-fileID] <String> [-folderID] <String> [[-parentFolderID] <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -21,7 +22,7 @@ A function to change parent folder metadata of a file.
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 MoveGFile -fileID 'String of File ID' -folderID 'String of folder's File ID'
 ```
@@ -34,7 +35,7 @@ OAuth Access Token for authorization.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -49,7 +50,7 @@ The fileID to move.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 2
@@ -64,7 +65,7 @@ The fileID of the new parent folder.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 3
@@ -81,7 +82,7 @@ root (My Drive) is assumed if not specified.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 4
@@ -90,6 +91,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -97,4 +101,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-
