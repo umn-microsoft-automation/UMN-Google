@@ -507,7 +507,7 @@ function Remove-GFilePermissions
         .NOTES
             A successfull removal returns no body data. 
     #>
-    [CmdletBinding(DefaultParameterSetName = 'Default')]
+    [CmdletBinding()]
     Param
     (
         [Parameter(Mandatory)]
@@ -516,42 +516,21 @@ function Remove-GFilePermissions
         #[Alias("spreadSheetID")]
         [Parameter(Mandatory)]
         [string]$fileID,
+        
+        [Parameter(Mandatory)]
+        [string]$permissionID
 
-        # Parameter help description
-        [Parameter(Mandatory,ParameterSetName="All")]
-        [switch]$allFields,
-
-        # Parameter help description
-        [Parameter(Mandatory,ParameterSetName="Specify")]
-        [string]
-        $fields
     )
 
     Begin
     {
-        if ($PSBoundParameters.ContainsKey("AllFields")) {
-            if ($allFields) {
-                $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?fields=*"
-            } else {
-                $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/"
-            }
-        } elseif ($PSBoundParameters.ContainsKey("fields")) {
-            $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?fields=$fields"
-        } else {
-            $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?fields=*"
-        }
+        $uri = "https://www.googleapis.com/drive/v3/files/$fileId/permissions/$permissionId"
         $headers = @{"Authorization"="Bearer $accessToken"}
     }
 
     Process
     {
-        $permissions = @()
-        do {
-            $return = Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
-            $permissions += $return.permissions
-        } while ($return.nextpagetoken)
-        $return = Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
-        return $permissions
+        Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers
     }
     End{}
 }
