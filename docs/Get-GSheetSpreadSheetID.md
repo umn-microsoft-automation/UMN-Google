@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -13,7 +13,7 @@ Get a spreadsheet ID.
 ## SYNTAX
 
 ```
-Get-GSheetSpreadSheetID [-accessToken] <String> [-fileName] <String>
+Get-GSheetSpreadSheetID [-accessToken] <String> [-fileName] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -22,7 +22,7 @@ mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other fi
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Get-GSheetSpreadSheetID -accessToken $accessToken -fileName 'Name of some file'
 ```
@@ -36,7 +36,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -61,6 +61,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -68,4 +71,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

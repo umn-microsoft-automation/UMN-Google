@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,12 +14,12 @@ Create a new Google SpreadSheet.
 
 ### properties
 ```
-New-GSheetSpreadSheet -accessToken <String> [-properties <Array>]
+New-GSheetSpreadSheet -accessToken <String> [-properties <Array>] [<CommonParameters>]
 ```
 
 ### title
 ```
-New-GSheetSpreadSheet -accessToken <String> [-title <String>]
+New-GSheetSpreadSheet -accessToken <String> [-title <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -27,12 +27,12 @@ Create a new Google SpreadSheet.
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Create-GSheet -properties $properties -accessToken $accessToken
 ```
 
-### -------------------------- EXAMPLE 2 --------------------------
+### EXAMPLE 2
 ```
 create-GSheet -title 'My sheet' -accessToken $accessToken
 ```
@@ -46,7 +46,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -65,7 +65,7 @@ More details at https://developers.google.com/sheets/api/reference/rest/v4/sprea
 ```yaml
 Type: Array
 Parameter Sets: properties
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -80,7 +80,7 @@ Use this in the simplest case to just create a new sheet with a Title/name
 ```yaml
 Type: String
 Parameter Sets: title
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -89,6 +89,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -96,4 +99,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

@@ -1,5 +1,8 @@
 # UMN-Google
 
+## Update '1.2.7'
+Expand Get-GFilePermissions to get more details and get specific permissions if specified
+
 ## Update '1.2.6'
 Add functions Get-GFileID and Get-GFile'
 Get-GFileID with fetch the ID of any file in Drive that you have access to.  This can then be feed into other functions
