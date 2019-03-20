@@ -173,26 +173,27 @@ function Get-GOAuthTokenUser
         .PARAMETER appSecret
             The google project application secret
 
-        .PARAMETER projectID
-            The google project ID
-
         .PARAMETER redirectUri
-            An https project redirect. Can be anything as long as https
+            An https project redirect. Can be anything as long as https, only needed when generating a new token
 
         .PARAMETER refreshToken
             A refresh token if refreshing
 
-        .PARAMATER scope
+        .PARAMETER scope
             The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+            Only needed when generating a new token
         
         .EXAMPLE
-            Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope
+            Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -redirectUri $redirectUri -scope $scope
                 
         .EXAMPLE
-            Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
+            Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
             
         .NOTES
-            Requires GUI with Internet Explorer to get first token.      
+            Requires GUI with Internet Explorer to get first token.
+            If this code doesn't work to generate a new token, use the following URL to manually create it
+            https://lazyadmin.nl/it/connect-to-google-api-with-powershell/
+            That will generate a refresh token that can be used with this cmdlet
     #>
     [CmdletBinding()]
     [OutputType([array])]
@@ -204,15 +205,13 @@ function Get-GOAuthTokenUser
         [Parameter(Mandatory)]
         [string]$appSecret,
         
-        [Parameter(Mandatory)]
-        [string]$projectID,
-        
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,ParameterSetName="NewToken")]
         [string]$redirectUri,
 
+        [Parameter(Mandatory,ParameterSetName="Refresh")]
         [string]$refreshToken,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory,ParameterSetName="NewToken")]
         [string]$scope
 
     )
@@ -224,8 +223,12 @@ function Get-GOAuthTokenUser
     Process
     {
 
-        if(!($refreshToken))
-        { 
+        if($PSCmdlet.ParameterSetName -eq "NewToken")
+        {
+            Write-Warning "This probably won't work"
+            Write-Warning "See this URL on how go manually generate a refresh token"
+            Write-Warning "Once you have a refresh token you can use the cmdlet to retreive a new access token"
+            Write-Warning "https://lazyadmin.nl/it/connect-to-google-api-with-powershell/"
             ### Get the authorization code - IE Popup and user interaction section
             $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
             $ie = New-Object -comObject InternetExplorer.Application
