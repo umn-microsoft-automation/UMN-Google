@@ -386,6 +386,63 @@ function Get-GFileID
 }
 #endregion 
 
+#region Get-GFileRevisions
+function Get-GFileRevisions
+{
+    <#
+        .Synopsis
+            Get a files revision history
+
+        .DESCRIPTION
+            Get a files revision history
+
+        .PARAMETER accessToken
+            access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+        .PARAMETER fileName
+            Name of file to retrive ID for. Case sensitive
+        
+        .PARAMETER fileID
+            File ID.  Can be gotten from Get-GFileID    
+        
+        .EXAMPLE
+            Get-GFileRevisions -accessToken $accessToken -fileName 'Name of some file'
+            # Get last modified
+            Get-Date ((Get-GFileRevisions -fileName $filename -accessToken $accessToken).revisions.modifiedTime[-1])
+
+        .EXAMPLE
+            Get-GFileRevisions -accessToken $accessToken -fileID 'ID of some file'
+            # Get last modified
+            Get-Date ((Get-GFileRevisions -fileName $filename -accessToken $accessToken).revisions.modifiedTime[-1])
+
+        .NOTES
+            Written by Travis Sobeck
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [Parameter(ParameterSetName='fileName')]
+        [string]$fileName,
+
+        [Parameter(ParameterSetName='fileID')]
+        [string]$fileID
+    )
+
+    Begin{}
+    Process
+    {
+        if ($fileName){$fileID = Get-GFileID -accessToken $accessToken -fileName $fileName}
+        If ($fileID.count -eq 0 -or $fileID.count -gt 1){break}
+        $uri = "https://www.googleapis.com/drive/v3/files/$($fileID)/revisions"
+        Invoke-RestMethod -Method Get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
+    }
+    End{}
+}
+#endregion
+
 #region Permissions for Google Drive files
 
 function Get-GFilePermissions
@@ -914,6 +971,7 @@ function Update-GFilePermissions
     }
 #endregion
 
+#region Get-GSheetSheetID
 function Get-GSheetSheetID
 {
     <#
@@ -956,6 +1014,7 @@ function Get-GSheetSheetID
     }
     End{}
 }
+#endregion
 
 #region Get-GSheetSpreadSheetID
     function Get-GSheetSpreadSheetID
@@ -997,6 +1056,7 @@ function Get-GSheetSheetID
     }
 #endregion
 
+#region Get-GSheetSpreadSheetProperties
 function Get-GSheetSpreadSheetProperties
 {
     <#
@@ -1032,7 +1092,7 @@ function Get-GSheetSpreadSheetProperties
     }
     End{}
 }
-
+#endregion
 function Move-GSheetData
 {
     <#
