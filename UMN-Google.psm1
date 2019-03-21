@@ -457,8 +457,21 @@ function Get-GFilePermissions
         .PARAMETER fileID
             The fileID to query.  This is returned when a new file is created.
 
+        .PARAMETER permissionID
+            If specified will query only that specific permission for the file, rather than all permissions
+
+        .PARAMETER DefaultFields
+            If specified, will only query "default" rather than querying all fields of Permission object.  Added primarily for backwards compatibility
+
         .EXAMPLE
-            Get-GFilePermissions -fileID 'String of File ID'
+            Get-GFilePermissions -accessToken $accessToken -fileID 'String of File ID' -permissionID 'String of Permission ID'
+
+        .OUTPUTS
+            If only a fileID, this will return an object with two properties, the first is kind, and will always be drive#permissionList
+            The second will be permissions, which includes the individual permissions objects.  Each one of these will have the same format as if a specific PermissionID was requested
+            If a permissionID is also specified, only that specific permission will be returned.  It will have a kind property of drive#permission as well as all properties of that specific permission.
+            More details on the permission object available here: https://developers.google.com/drive/api/v2/reference/permissions
+
     #>
     [CmdletBinding()]
     Param
@@ -468,17 +481,34 @@ function Get-GFilePermissions
 
         #[Alias("spreadSheetID")]
         [Parameter(Mandatory)]
-        [string]$fileID
+        [string]$fileID,
+
+        # Parameter help description
+        [Parameter()]
+        [string]
+        $permissionID,
+
+        # Parameter help description
+        [Parameter()]
+        [switch]
+        $DefaultFields
     )
 
     Begin
     {
         $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
+        if ($permissionID) {
+            $uri += "/$permissionID"
+        }
+        if (-not $DefaultFields) {
+            $uri += "/?fields=*"
+        }
         $headers = @{"Authorization"="Bearer $accessToken"}
     }
 
     Process
     {
+        write-host $uri
         Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
     }
     End{}

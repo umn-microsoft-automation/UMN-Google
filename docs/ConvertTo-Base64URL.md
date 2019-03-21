@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,12 +14,12 @@ convert text or byte array to URL friendly Base64
 
 ### Bytes
 ```
-ConvertTo-Base64URL [-Bytes <Byte[]>]
+ConvertTo-Base64URL [-Bytes <Byte[]>] [<CommonParameters>]
 ```
 
 ### String
 ```
-ConvertTo-Base64URL [-text <String>]
+ConvertTo-Base64URL [-text <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -27,12 +27,12 @@ Used for preparing the JWT token to a proper format.
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 ConvertTo-Base64URL -text $headerJSON
 ```
 
-### -------------------------- EXAMPLE 2 --------------------------
+### EXAMPLE 2
 ```
 ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256")
 ```
@@ -45,7 +45,7 @@ The bytes to be converted
 ```yaml
 Type: Byte[]
 Parameter Sets: Bytes
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -60,7 +60,7 @@ The text to be converted
 ```yaml
 Type: String
 Parameter Sets: String
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -69,6 +69,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -76,4 +79,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

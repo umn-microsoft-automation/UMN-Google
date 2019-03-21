@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,7 +14,7 @@ Set the width of a column on a sheet
 
 ```
 Set-GSheetColumnWidth [-accessToken] <String> [[-numberOfColumns] <String>] [-sheetName] <String>
- [-spreadSheetID] <String>
+ [-spreadSheetID] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -22,7 +22,7 @@ This function calls the bulk update method to set column dimensions to 'autoResi
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Set-GSheetColumnWidth -spreadSheetID $id -sheetName 'Sheet1' -accessToken $token -numberOfColumns ($property.count)
 ```
@@ -36,7 +36,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -52,7 +52,7 @@ Default to 26
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 2
@@ -67,7 +67,7 @@ Name of sheet in spreadSheet
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 3
@@ -83,7 +83,7 @@ This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 4
@@ -92,6 +92,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -99,4 +102,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

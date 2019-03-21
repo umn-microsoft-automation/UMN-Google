@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -15,13 +15,13 @@ Set values in sheet in specific cell locations or append data to a sheet
 ### Append
 ```
 Set-GSheetData -accessToken <String> [-append] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList>
+ [-valueInputOption <String>] -values <ArrayList> [<CommonParameters>]
 ```
 
 ### set
 ```
 Set-GSheetData -accessToken <String> [-rangeA1 <String>] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList>
+ [-valueInputOption <String>] -values <ArrayList> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -29,12 +29,12 @@ Set json data values on a sheet in specific cell locations or append data to a s
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 Set-GSheetData -accessToken $accessToken -rangeA1 'A1:B2' -sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values @(@("a","b"),@("c","D"))
 ```
 
-### -------------------------- EXAMPLE 2 --------------------------
+### EXAMPLE 2
 ```
 Set-GSheetData -accessToken $accessToken -append 'Append'-sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values $arrayValues
 ```
@@ -48,7 +48,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -64,7 +64,7 @@ See rangeA1 if not appending
 ```yaml
 Type: SwitchParameter
 Parameter Sets: Append
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -80,7 +80,7 @@ The dimensions of the $values you put in MUST fit within this range
 ```yaml
 Type: String
 Parameter Sets: set
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -95,7 +95,7 @@ Name of sheet to set data in
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -111,7 +111,7 @@ This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -127,7 +127,7 @@ Optionally, you can specify if you want it processed as a formula and so forth.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: Named
@@ -144,7 +144,7 @@ Each list array represents one ROW on the sheet.
 ```yaml
 Type: ArrayList
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: Named
@@ -153,6 +153,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+
 ## INPUTS
 
 ## OUTPUTS
@@ -160,4 +163,3 @@ Accept wildcard characters: False
 ## NOTES
 
 ## RELATED LINKS
-

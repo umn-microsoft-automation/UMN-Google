@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GOAuthTokenUser
+# Remove-GSheetSheetRowColumn
 
 ## SYNOPSIS
 {{Fill in the Synopsis}}
@@ -13,8 +13,8 @@ schema: 2.0.0
 ## SYNTAX
 
 ```
-Get-GOAuthTokenUser [-appKey] <String> [-appSecret] <String> [-projectID] <String> [-redirectUri] <String>
- [[-refreshToken] <String>] [-scope] <String> [<CommonParameters>]
+Remove-GSheetSheetRowColumn [-accessToken] <String> [-startIndex] <Int32> [-endIndex] <Int32>
+ [-dimension] <String> [-sheetName] <String> [-spreadSheetID] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -23,7 +23,7 @@ Get-GOAuthTokenUser [-appKey] <String> [-appSecret] <String> [-projectID] <Strin
 ## EXAMPLES
 
 ### Example 1
-```
+```powershell
 PS C:\> {{ Add example code here }}
 ```
 
@@ -31,8 +31,8 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -appKey
-{{Fill appKey Description}}
+### -accessToken
+{{Fill accessToken Description}}
 
 ```yaml
 Type: String
@@ -46,26 +46,27 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -appSecret
-{{Fill appSecret Description}}
+### -dimension
+{{Fill dimension Description}}
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
+Accepted values: COLUMNS, ROWS
 
 Required: True
-Position: 1
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -projectID
-{{Fill projectID Description}}
+### -endIndex
+{{Fill endIndex Description}}
 
 ```yaml
-Type: String
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
@@ -76,8 +77,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -redirectUri
-{{Fill redirectUri Description}}
+### -sheetName
+{{Fill sheetName Description}}
 
 ```yaml
 Type: String
@@ -85,29 +86,14 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -refreshToken
-{{Fill refreshToken Description}}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
 Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -scope
-{{Fill scope Description}}
+### -spreadSheetID
+{{Fill spreadSheetID Description}}
 
 ```yaml
 Type: String
@@ -121,8 +107,24 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -startIndex
+{{Fill startIndex Description}}
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable.
+For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
@@ -130,8 +132,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Array
-
+### System.Object
 ## NOTES
 
 ## RELATED LINKS

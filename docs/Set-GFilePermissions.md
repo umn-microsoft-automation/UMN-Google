@@ -1,7 +1,7 @@
 ---
 external help file: UMN-Google-help.xml
 Module Name: UMN-Google
-online version: 
+online version:
 schema: 2.0.0
 ---
 
@@ -14,7 +14,7 @@ Set Permissions on Google File
 
 ```
 Set-GFilePermissions [-accessToken] <String> [-emailAddress] <String> [-fileID] <String> [[-role] <String>]
- [[-sendNotificationEmail] <Boolean>] [[-type] <String>]
+ [[-sendNotificationEmail] <Boolean>] [[-type] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -22,7 +22,7 @@ For use with any google drive file ID
 
 ## EXAMPLES
 
-### -------------------------- EXAMPLE 1 --------------------------
+### EXAMPLE 1
 ```
 set-GFilePermissions -emailAddress 'user@email.com' -role writer -sheetID $sheetID -type user
 ```
@@ -36,7 +36,7 @@ Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 1
@@ -51,7 +51,7 @@ Email address of the user or group to grant permissions to
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 2
@@ -66,7 +66,7 @@ The fileID to apply permissions to.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: True
 Position: 3
@@ -81,7 +81,7 @@ Role to assign, select from 'writer','reader','commenter'
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 4
@@ -96,7 +96,7 @@ Boolean response on sending email notification.
 ```yaml
 Type: Boolean
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 5
@@ -111,7 +111,7 @@ This refers to the emailAddress, is it a user or a group
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: 
+Aliases:
 
 Required: False
 Position: 6
@@ -119,6 +119,9 @@ Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
+
+### CommonParameters
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
@@ -128,4 +131,3 @@ Accept wildcard characters: False
 Requires drive and drive.file API scope.
 
 ## RELATED LINKS
-
