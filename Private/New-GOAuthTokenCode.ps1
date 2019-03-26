@@ -13,10 +13,10 @@ function New-GOAuthTokenCode {
 @"
 <html>
 <head>
-<title>You may close your browser</title>
+<title>You may close this page</title>
 </head>
 <body>
-You can close this page
+You may close this page and return to your Powershell terminal
 </body>
 </html>
 "@
