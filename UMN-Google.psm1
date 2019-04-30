@@ -159,7 +159,7 @@ function ConvertTo-Base64URL
             }
         }
     #endregion
-    
+
     #region Get-GOAuthTokenUser
         function Get-GOAuthTokenUser
         {
@@ -280,7 +280,7 @@ function ConvertTo-Base64URL
                     The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
                 
                 .PARAMETER clientID
-                    Client ID 
+                    Client ID within app project
 
                 .PARAMETER redirectUri
                     An https project redirect. Can be anything as long as https

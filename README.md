@@ -1,5 +1,8 @@
 # UMN-Google
 
+## Update '1.2.8'
+Add function Get-GOAuthIdToken -- Function returns a Google ID Toekn for a user for a given Client ID
+
 ## Update '1.2.7'
 Expand Get-GFilePermissions to get more details and get specific permissions if specified
 
