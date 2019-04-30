@@ -159,6 +159,7 @@ function ConvertTo-Base64URL
             }
         }
     #endregion
+    
     #region Get-GOAuthTokenUser
         function Get-GOAuthTokenUser
         {
@@ -225,33 +226,30 @@ function ConvertTo-Base64URL
             }
             Process
             {
-
                 if(!($refreshToken))
                 { 
                     ### Get the authorization code - IE Popup and user interaction section
-                    $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=token%20id_token&redirect_uri=$redirectUri&client_id=$appKey&approval_prompt=force"
+                    $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
                     $ie = New-Object -comObject InternetExplorer.Application
                     $ie.visible = $true
                     $null = $ie.navigate($auth_string)
 
                     #Wait for user interaction in IE, manual approval
-                    do{Start-Sleep 1}until($ie.LocationURL -match 'id_token=([^&]*)')
-                    $null = $ie.LocationURL -match 'id_token=([^&]*)'
-                    #$ie.LocationURL
-                    $id_token = $matches[1]
+                    do{Start-Sleep 1}until($ie.LocationURL -match 'code=([^&]*)')
+                    $null = $ie.LocationURL -match 'code=([^&]*)'
+                    $authorizationCode = $matches[1]
                     $null = $ie.Quit()
-                    $id_token
+
                     # exchange the authorization code for a refresh token and access token
                     $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
         
                     $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-                    $response
+
                     $props = @{
                         accessToken = $response.access_token
                         refreshToken = $response.refresh_token
                     }
                 }
-
                 else
                 { 
                     # Exchange the refresh token for new tokens
@@ -262,8 +260,7 @@ function ConvertTo-Base64URL
                         accessToken = $response.access_token
                         refreshToken = $refreshToken
                     }
-                }
-                
+                }                
             }
             End
             {
