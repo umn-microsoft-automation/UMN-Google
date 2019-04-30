@@ -277,27 +277,18 @@ function ConvertTo-Base64URL
         {
             <#
                 .Synopsis
-                    Get Valid OAuth Token.  
+                    Get Valid OAuth ID token for a user.  
                 
                 .DESCRIPTION
-                    The access token is good for an hour, the refresh token is mostly permanent and can be used to get a new access token without having to reauthenticate.
+                    The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
                 
-                .PARAMETER appKey
-                    The google project App Key
-
-                .PARAMETER appSecret
-                    The google project application secret
-
-                .PARAMETER projectID
-                    The google project ID
+                .PARAMETER clientID
+                    Client ID 
 
                 .PARAMETER redirectUri
                     An https project redirect. Can be anything as long as https
 
-                .PARAMETER refreshToken
-                    A refresh token if refreshing
-
-                .PARAMATER scope
+                .PARAMETER scope
                     The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
                 
                 .EXAMPLE
@@ -309,23 +300,16 @@ function ConvertTo-Base64URL
                 .NOTES
                     Requires GUI with Internet Explorer to get first token.      
             #>
+
             [CmdletBinding()]
             [OutputType([array])]
             Param
             (
                 [Parameter(Mandatory)]
-                [string]$appKey,
-
-                [Parameter(Mandatory)]
-                [string]$appSecret,
-                
-                [Parameter(Mandatory)]
-                [string]$projectID,
+                [string]$clientID,
                 
                 [Parameter(Mandatory)]
                 [string]$redirectUri,
-
-                [string]$refreshToken,
 
                 [Parameter(Mandatory)]
                 [string]$scope
@@ -339,52 +323,25 @@ function ConvertTo-Base64URL
             Process
             {
 
-                if(!($refreshToken))
-                { 
-                    ### Get the authorization code - IE Popup and user interaction section
-                    $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=token%20id_token&redirect_uri=$redirectUri&client_id=$appKey&approval_prompt=force"
-                    $ie = New-Object -comObject InternetExplorer.Application
-                    $ie.visible = $true
-                    $null = $ie.navigate($auth_string)
+                ### Get the ID Token - IE Popup and user interaction section
+                $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=token%20id_token&redirect_uri=$redirectUri&client_id=$clientID&approval_prompt=force"
+                $ie = New-Object -comObject InternetExplorer.Application
+                $ie.visible = $true
+                $null = $ie.navigate($auth_string)
 
-                    #Wait for user interaction in IE, manual approval
-                    do{Start-Sleep 1}until($ie.LocationURL -match 'id_token=([^&]*)')
-                    $null = $ie.LocationURL -match 'id_token=([^&]*)'
-                    #$ie.LocationURL
-                    $id_token = $matches[1]
-                    $null = $ie.Quit()
-                    $id_token
-                    # exchange the authorization code for a refresh token and access token
-                    $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
-        
-                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-                    $response
-                    $props = @{
-                        accessToken = $response.access_token
-                        refreshToken = $response.refresh_token
-                    }
-                }
-
-                else
-                { 
-                    # Exchange the refresh token for new tokens
-                    $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
-        
-                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-                    $props = @{
-                        accessToken = $response.access_token
-                        refreshToken = $refreshToken
-                    }
-                }
-                
+                #Wait for user interaction in IE, manual approval
+                do{Start-Sleep 1}until($ie.LocationURL -match 'id_token=([^&]*)')
+                $null = $ie.LocationURL -match 'id_token=([^&]*)'
+                Write-Debug $ie.LocationURL
+                $id_token = $matches[1]
+                $null = $ie.Quit()
+                return $id_token
             }
-            End
-            {
-                return new-object psobject -Property $props
-            }
+            End{}
         }
     #endregion
-#endregion
+
+    #endregion
 
 #region Get-GFile
 function Get-GFile
