@@ -289,10 +289,7 @@ function ConvertTo-Base64URL
                     The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
                 
                 .EXAMPLE
-                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope
-                        
-                .EXAMPLE
-                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
+                    Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
                     
                 .NOTES
                     Requires GUI with Internet Explorer to get first token.      
