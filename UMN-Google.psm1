@@ -66,207 +66,274 @@ function ConvertTo-Base64URL
 
 #region oAuth 2.0
 
-function Get-GOAuthTokenService
-{
-    <#
-        .Synopsis
-            Get google auth 2.0 token for a service account
+    #region Get-GOAuthTokenService
+        function Get-GOAuthTokenService
+        {
+            <#
+                .Synopsis
+                    Get google auth 2.0 token for a service account
 
-        .DESCRIPTION
-            This is used in server-server OAuth token generation
-        
-        .PARAMETER certPath
-            Local or network path to .p12 used to sign the JWT token
-
-        .PARAMETER certPswd
-            Password to access the private key in the .p12
-
-        .PARAMETER iss
-            This is the Google Service account address
-
-        .PARAMATER scope
-            The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+                .DESCRIPTION
+                    This is used in server-server OAuth token generation
                 
-        .EXAMPLE
-            Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
+                .PARAMETER certPath
+                    Local or network path to .p12 used to sign the JWT token
 
-    #>
-    [CmdletBinding()]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$certPath,
+                .PARAMETER certPswd
+                    Password to access the private key in the .p12
 
-        [Parameter(Mandatory)]
-        [string]$certPswd,
+                .PARAMETER iss
+                    This is the Google Service account address
 
-        [Parameter(Mandatory)]
-        [string]$iss,
-        
-        [Parameter(Mandatory)]
-        [string]$scope
-    )
+                .PARAMATER scope
+                    The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+                        
+                .EXAMPLE
+                    Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
 
-    Begin
-    {
-        # build JWT header
-        $headerJSON = [Ordered]@{
-            alg = "RS256"
-            typ = "JWT"
-        } | ConvertTo-Json -Compress
-        $headerBase64 = ConvertTo-Base64URL -text $headerJSON
-    }
-    Process
-    {        
-        # Build claims for JWT
-        $now = (Get-Date).ToUniversalTime()
-        $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-        $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s")) 
-        $aud = "https://www.googleapis.com/oauth2/v4/token"
-        $claimsJSON = [Ordered]@{
-            iss = $iss
-            scope = $scope
-            aud = $aud
-            exp = $exp
-            iat = $iat
-        } | ConvertTo-Json -Compress
+            #>
+            [CmdletBinding()]
+            Param
+            (
+                [Parameter(Mandatory)]
+                [string]$certPath,
 
-        $claimsBase64 = ConvertTo-Base64URL -text $claimsJSON
+                [Parameter(Mandatory)]
+                [string]$certPswd,
 
-        ################# Create JWT
-        # Prep JWT certificate signing
-        $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
-        $rsaPrivate = $googleCert.PrivateKey 
-        $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
-        $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
-        
-        # Signature is our base64urlencoded header and claims, delimited by a period. 
-        $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
-        $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
-        
-        # Build request
-        $jwt = $headerBase64 + "." + $claimsBase64 + "." + $signature
-        $fields = 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+$jwt
-
-        # Fetch token
-        $response = Invoke-RestMethod -Uri "https://www.googleapis.com/oauth2/v4/token" -Method Post -Body $fields -ContentType "application/x-www-form-urlencoded"
-
-    }
-    End
-    {
-        return $response.access_token
-    }
-}
-
-function Get-GOAuthTokenUser
-{
-    <#
-        .Synopsis
-            Get Valid OAuth Token.  
-        
-        .DESCRIPTION
-            The access token is good for an hour, the refresh token is mostly permanent and can be used to get a new access token without having to reauthenticate.
-        
-        .PARAMETER appKey
-            The google project App Key
-
-        .PARAMETER appSecret
-            The google project application secret
-
-        .PARAMETER projectID
-            The google project ID
-
-        .PARAMETER redirectUri
-            An https project redirect. Can be anything as long as https
-
-        .PARAMETER refreshToken
-            A refresh token if refreshing
-
-        .PARAMATER scope
-            The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
-        
-        .EXAMPLE
-            Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope
+                [Parameter(Mandatory)]
+                [string]$iss,
                 
-        .EXAMPLE
-            Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
-            
-        .NOTES
-            Requires GUI with Internet Explorer to get first token.      
-    #>
-    [CmdletBinding()]
-    [OutputType([array])]
-    Param
-    (
-        [Parameter(Mandatory)]
-        [string]$appKey,
+                [Parameter(Mandatory)]
+                [string]$scope
+            )
 
-        [Parameter(Mandatory)]
-        [string]$appSecret,
-        
-        [Parameter(Mandatory)]
-        [string]$projectID,
-        
-        [Parameter(Mandatory)]
-        [string]$redirectUri,
+            Begin
+            {
+                # build JWT header
+                $headerJSON = [Ordered]@{
+                    alg = "RS256"
+                    typ = "JWT"
+                } | ConvertTo-Json -Compress
+                $headerBase64 = ConvertTo-Base64URL -text $headerJSON
+            }
+            Process
+            {        
+                # Build claims for JWT
+                $now = (Get-Date).ToUniversalTime()
+                $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
+                $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s")) 
+                $aud = "https://www.googleapis.com/oauth2/v4/token"
+                $claimsJSON = [Ordered]@{
+                    iss = $iss
+                    scope = $scope
+                    aud = $aud
+                    exp = $exp
+                    iat = $iat
+                } | ConvertTo-Json -Compress
 
-        [string]$refreshToken,
+                $claimsBase64 = ConvertTo-Base64URL -text $claimsJSON
 
-        [Parameter(Mandatory)]
-        [string]$scope
+                ################# Create JWT
+                # Prep JWT certificate signing
+                $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
+                $rsaPrivate = $googleCert.PrivateKey 
+                $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
+                $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
+                
+                # Signature is our base64urlencoded header and claims, delimited by a period. 
+                $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
+                $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
+                
+                # Build request
+                $jwt = $headerBase64 + "." + $claimsBase64 + "." + $signature
+                $fields = 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+$jwt
 
-    )
+                # Fetch token
+                $response = Invoke-RestMethod -Uri "https://www.googleapis.com/oauth2/v4/token" -Method Post -Body $fields -ContentType "application/x-www-form-urlencoded"
 
-    Begin
-    {
-        $requestUri = "https://accounts.google.com/o/oauth2/token"
-    }
-    Process
-    {
-
-        if(!($refreshToken))
-        { 
-            ### Get the authorization code - IE Popup and user interaction section
-            $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
-            $ie = New-Object -comObject InternetExplorer.Application
-            $ie.visible = $true
-            $null = $ie.navigate($auth_string)
-
-            #Wait for user interaction in IE, manual approval
-            do{Start-Sleep 1}until($ie.LocationURL -match 'code=([^&]*)')
-            $null = $ie.LocationURL -match 'code=([^&]*)'
-            $authorizationCode = $matches[1]
-            $null = $ie.Quit()
-
-            # exchange the authorization code for a refresh token and access token
-            $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
- 
-            $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-
-            $props = @{
-                accessToken = $response.access_token
-                refreshToken = $response.refresh_token
+            }
+            End
+            {
+                return $response.access_token
             }
         }
+    #endregion
 
-        else
-        { 
-            # Exchange the refresh token for new tokens
-            $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
- 
-            $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-            $props = @{
-                accessToken = $response.access_token
-                refreshToken = $refreshToken
+    #region Get-GOAuthTokenUser
+        function Get-GOAuthTokenUser
+        {
+            <#
+                .Synopsis
+                    Get Valid OAuth Token.  
+                
+                .DESCRIPTION
+                    The access token is good for an hour, the refresh token is mostly permanent and can be used to get a new access token without having to reauthenticate.
+                
+                .PARAMETER appKey
+                    The google project App Key
+
+                .PARAMETER appSecret
+                    The google project application secret
+
+                .PARAMETER projectID
+                    The google project ID
+
+                .PARAMETER redirectUri
+                    An https project redirect. Can be anything as long as https
+
+                .PARAMETER refreshToken
+                    A refresh token if refreshing
+
+                .PARAMATER scope
+                    The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+                
+                .EXAMPLE
+                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope
+                        
+                .EXAMPLE
+                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
+                    
+                .NOTES
+                    Requires GUI with Internet Explorer to get first token.      
+            #>
+            [CmdletBinding()]
+            [OutputType([array])]
+            Param
+            (
+                [Parameter(Mandatory)]
+                [string]$appKey,
+
+                [Parameter(Mandatory)]
+                [string]$appSecret,
+                
+                [Parameter(Mandatory)]
+                [string]$projectID,
+                
+                [Parameter(Mandatory)]
+                [string]$redirectUri,
+
+                [string]$refreshToken,
+
+                [Parameter(Mandatory)]
+                [string]$scope
+
+            )
+
+            Begin
+            {
+                $requestUri = "https://accounts.google.com/o/oauth2/token"
+            }
+            Process
+            {
+                if(!($refreshToken))
+                { 
+                    ### Get the authorization code - IE Popup and user interaction section
+                    $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
+                    $ie = New-Object -comObject InternetExplorer.Application
+                    $ie.visible = $true
+                    $null = $ie.navigate($auth_string)
+
+                    #Wait for user interaction in IE, manual approval
+                    do{Start-Sleep 1}until($ie.LocationURL -match 'code=([^&]*)')
+                    $null = $ie.LocationURL -match 'code=([^&]*)'
+                    $authorizationCode = $matches[1]
+                    $null = $ie.Quit()
+
+                    # exchange the authorization code for a refresh token and access token
+                    $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
+        
+                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
+
+                    $props = @{
+                        accessToken = $response.access_token
+                        refreshToken = $response.refresh_token
+                    }
+                }
+                else
+                { 
+                    # Exchange the refresh token for new tokens
+                    $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
+        
+                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
+                    $props = @{
+                        accessToken = $response.access_token
+                        refreshToken = $refreshToken
+                    }
+                }                
+            }
+            End
+            {
+                return new-object psobject -Property $props
             }
         }
-        
-    }
-    End
-    {
-        return new-object psobject -Property $props
-    }
-}
+    #endregion
+
+    #region Get-GOAuthIdToken
+        function Get-GOAuthIdToken
+        {
+            <#
+                .Synopsis
+                    Get Valid OAuth ID token for a user.  
+                
+                .DESCRIPTION
+                    The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
+                
+                .PARAMETER clientID
+                    Client ID within app project
+
+                .PARAMETER redirectUri
+                    An https project redirect. Can be anything as long as https
+
+                .PARAMETER scope
+                    The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+                
+                .EXAMPLE
+                    Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
+                    
+                .NOTES
+                    Requires GUI with Internet Explorer to get first token.      
+            #>
+
+            [CmdletBinding()]
+            [OutputType([array])]
+            Param
+            (
+                [Parameter(Mandatory)]
+                [string]$clientID,
+                
+                [Parameter(Mandatory)]
+                [string]$redirectUri,
+
+                [Parameter(Mandatory)]
+                [string]$scope
+
+            )
+
+            Begin
+            {
+                $requestUri = "https://accounts.google.com/o/oauth2/token"
+            }
+            Process
+            {
+
+                ### Get the ID Token - IE Popup and user interaction section
+                $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=token%20id_token&redirect_uri=$redirectUri&client_id=$clientID&approval_prompt=force"
+                $ie = New-Object -comObject InternetExplorer.Application
+                $ie.visible = $true
+                $null = $ie.navigate($auth_string)
+
+                #Wait for user interaction in IE, manual approval
+                do{Start-Sleep 1}until($ie.LocationURL -match 'id_token=([^&]*)')
+                $null = $ie.LocationURL -match 'id_token=([^&]*)'
+                Write-Debug $ie.LocationURL
+                $id_token = $matches[1]
+                $null = $ie.Quit()
+                return $id_token
+            }
+            End{}
+        }
+    #endregion
 
 #endregion
 
