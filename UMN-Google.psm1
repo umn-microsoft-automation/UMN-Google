@@ -335,7 +335,7 @@ function ConvertTo-Base64URL
         }
     #endregion
 
-    #endregion
+#endregion
 
 #region Get-GFile
 function Get-GFile
