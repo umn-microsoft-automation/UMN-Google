@@ -28,7 +28,7 @@
 RootModule = 'UMN-Google.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.7'
+ModuleVersion = '1.2.8'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -123,7 +123,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-         ReleaseNotes = 'Expand Get-GFilePermissions to get more details and get specific permissions if specified'
+         ReleaseNotes = 'Ad function Get-GOAuthIdToken'
 
     } # End of PSData hashtable
 
