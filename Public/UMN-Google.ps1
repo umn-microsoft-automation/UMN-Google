@@ -448,7 +448,7 @@ function Remove-GFilePermissions
         .PARAMETER fileID
             The fileID to query.  This is returned when a new file is created.
 
-        .PARAMETER permissionsID
+        .PARAMETER permissionID
             The permission ID to be removed. See Get-GFilePermissions
 
         .EXAMPLE
@@ -969,10 +969,10 @@ function Move-GSheetData
         .PARAMETER columnKey
             Row 0 column value. A key to search for data by. $columnKey = 'Column header'
 
-        .PARAMETER currentSheetName
+        .PARAMETER sourceSheetName
             Name of sheet to be searched, and copied from.
 
-        .PARAMETER newSheetName
+        .PARAMETER destinationSheetName
             Name of destination sheet data is to be written to.
 
         .PARAMETER query

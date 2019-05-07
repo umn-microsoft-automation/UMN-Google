@@ -4,18 +4,18 @@ $moduleName = Split-Path $moduleRoot -Leaf
 
 Import-Module (Join-Path $moduleRoot "$moduleName.psd1") -force
 
-Describe "Help tests for UMN-Google" -Tags 'Build' {
+Describe "Help tests for $moduleName" -Tags 'Build' {
     
     $functions = Get-Command -Module $moduleName -CommandType Function
     foreach($Function in $Functions){
         $help = Get-Help $Function.name
         Context $help.name {
-            it "Has a HelpUri" {
-                $Function.HelpUri | Should Not BeNullOrEmpty
-            }
-            It "Has related Links" {
-                $help.relatedLinks.navigationLink.uri.count | Should BeGreaterThan 0
-            }
+            #it "Has a HelpUri" {
+            #    $Function.HelpUri | Should Not BeNullOrEmpty
+            #}
+            #It "Has related Links" {
+            #    $help.relatedLinks.navigationLink.uri.count | Should BeGreaterThan 0
+            #}
             it "Has a description" {
                 $help.description | Should Not BeNullOrEmpty
             }
