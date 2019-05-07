@@ -1,9 +1,12 @@
 # UMN-Google
 
-## Update '1.2.8'
+## Update '1.2.9'
 Add Function Get-GFileRevisions
 Get-GFileRevisions will return the drive revision list.  Ref: https://developers.google.com/drive/api/v3/reference/revisions/list
 Example to get the last modified date: Get-Date ((Get-GFileRevisions -fileName $filename -accessToken $accessToken).revisions.modifiedTime[-1])
+
+## Update '1.2.8'
+Add function Get-GOAuthIdToken -- Function returns a Google ID Toekn for a user for a given Client ID
 
 ## Update '1.2.7'
 Expand Get-GFilePermissions to get more details and get specific permissions if specified

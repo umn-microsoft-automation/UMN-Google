@@ -123,7 +123,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-         ReleaseNotes = 'Expand Get-GFilePermissions to get more details and get specific permissions if specified'
+         ReleaseNotes = 'Ad function Get-GOAuthIdToken'
 
     } # End of PSData hashtable
 
