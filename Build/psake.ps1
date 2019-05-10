@@ -37,6 +37,13 @@ Task Test -Depends Init {
     $SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+    $projectRoot = Resolve-Path "$PSScriptRoot\.."
+    Write-Warning "Project Root: $projectRoot"
+    $moduleRoot = Split-Path (Resolve-Path "$projectRoot\*.psd1")
+    Write-Warning "Module Root: $moduleRoot"
+    $moduleName = (Get-Item (Join-Path $moduleRoot "*.psd1")).BaseName
+    Write-Warning "ModuleName = $moduleName"
+
     # Gather test results. Store them in a variable and file
     $TestResults = Invoke-Pester -Path $ProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile "$ProjectRoot\Build\$TestFile" -CodeCoverageOutputFile "$ProjectRoot\Build\$CodeCoverageFile" -CodeCoverage "$ProjectRoot\*.ps1"
     [Net.ServicePointManager]::SecurityProtocol = $SecurityProtocol
