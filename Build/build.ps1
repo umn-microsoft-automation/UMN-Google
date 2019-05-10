@@ -10,6 +10,8 @@ Import-Module Psake, BuildHelpers
 #get-command 'git'
 #write-warning $PWD.Path
 
+Get-Item Env:
+
 Set-BuildEnvironment
 
 Invoke-psake -buildFile .\Build\psake.ps1 -taskList $Task -nologo
