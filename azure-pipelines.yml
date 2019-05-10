@@ -1,0 +1,18 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+- powershell: .\Build\build.ps1
+  displayName: 'run build'
+
+- task: PublishTestResults@2
+  inputs:
+    testRunner: 'NUnit'
+    testResultsFiles: 'Build/TestResults_PS*.xml'
+    testRunTitle: 'Build Tests'
+  displayName: 'Build Tests'

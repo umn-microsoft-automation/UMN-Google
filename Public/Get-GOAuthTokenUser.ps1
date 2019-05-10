@@ -100,7 +100,7 @@ function Get-GOAuthTokenUser
         else
         { 
             # Exchange the refresh token for new tokens
-            $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
+            $requestBody = "refresh_token=$refreshToken&client_id=$clientID&client_secret=$clientSecret&grant_type=refresh_token"
  
             $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
             $props = @{
