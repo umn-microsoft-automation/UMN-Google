@@ -11,6 +11,7 @@ Import-Module Psake, BuildHelpers
 #write-warning $PWD.Path
 
 Get-Item Env:
+(get-item Env:BUILD_SourceVersionMessage).Value
 
 
 Set-BuildEnvironment
