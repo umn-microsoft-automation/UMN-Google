@@ -1,6 +1,9 @@
 $projectRoot = Resolve-Path "$PSScriptRoot\.."
+Write-Warning "Project Root: $projectRoot"
 $moduleRoot = Split-Path (Resolve-Path "$projectRoot\*.psd1")
+Write-Warning "Module Root: $moduleRoot"
 $moduleName = Split-Path $moduleRoot -Leaf
+Write-Warning "ModuleName = $moduleName"
 
 Import-Module (Join-Path $moduleRoot "$moduleName.psd1") -force
 
