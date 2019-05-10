@@ -16,3 +16,11 @@ steps:
     testResultsFiles: 'Build/TestResults_PS*.xml'
     testRunTitle: 'Build Tests'
   displayName: 'Build Tests'
+  condition: succeededOrFailed()
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: JaCoCo
+    summaryFileLocation: 'Build/CodeCoverage_PS*.xml'
+  displayName:  'Code Coverage'
+  condition: succeededOrFailed()
