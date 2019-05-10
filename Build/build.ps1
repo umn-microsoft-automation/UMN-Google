@@ -12,6 +12,7 @@ Import-Module Psake, BuildHelpers
 
 Get-Item Env:
 
+
 Set-BuildEnvironment
 
 Invoke-psake -buildFile .\Build\psake.ps1 -taskList $Task -nologo
