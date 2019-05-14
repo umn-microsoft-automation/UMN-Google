@@ -24,6 +24,7 @@ steps:
     reports: 'Build/CodeCoverage_PS*.xml'
     reporttypes: 'HtmlInline_AzurePipelines'
     sourcedirs: .
+    targetdir: coveragereport
 
 - task: PublishCodeCoverageResults@1
   inputs:
