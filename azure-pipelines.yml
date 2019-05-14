@@ -18,10 +18,18 @@ steps:
   displayName: 'Build Tests'
   condition: succeededOrFailed()
 
+steps:
+- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+  displayName: ReportGenerator
+  inputs:
+    reports: 'Build/CodeCoverage_PS*.xml'
+    reporttypes: 'HtmlInline_AzurePipelines'
+    sourcedirs: .
+
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: JaCoCo
     summaryFileLocation: 'Build/CodeCoverage_PS*.xml'
-    pathToSources: $(System.DefaultWorkingDirectory)
+    reportDirectory: coveragereport
   displayName:  'Code Coverage'
   condition: succeededOrFailed()
