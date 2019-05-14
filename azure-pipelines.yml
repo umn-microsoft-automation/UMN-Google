@@ -18,7 +18,6 @@ steps:
   displayName: 'Build Tests'
   condition: succeededOrFailed()
 
-steps:
 - task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
   displayName: ReportGenerator
   inputs:
