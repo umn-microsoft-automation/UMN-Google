@@ -44,8 +44,10 @@ Task Test -Depends Init {
     $moduleName = (Get-Item (Join-Path $moduleRoot "*.psd1")).BaseName
     Write-Warning "ModuleName = $moduleName"
 
+    $codeToCheck = Get-ChildItem $projectRoot -Include *.ps1, *.psm1, *.psd1 -Recurse | Where-Object PSParentPath -NotMatch "Build|Tests"
+
     # Gather test results. Store them in a variable and file
-    $TestResults = Invoke-Pester -Path $ProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile "$ProjectRoot\Build\$TestFile" -CodeCoverageOutputFile "$ProjectRoot\Build\$CodeCoverageFile" -CodeCoverage "$ProjectRoot"
+    $TestResults = Invoke-Pester -Path $ProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile "$ProjectRoot\Build\$TestFile" -CodeCoverageOutputFile "$ProjectRoot\Build\$CodeCoverageFile" -CodeCoverage $codeToCheck
     [Net.ServicePointManager]::SecurityProtocol = $SecurityProtocol
 
     # In Appveyor?  Upload our tests! #Abstract this into a function?
