@@ -18,7 +18,7 @@ steps:
   displayName: 'Build Tests'
   condition: succeededOrFailed()
 
-- task: Palmmedia.reportgenerator.reportgenerator-build-release-task.reportgenerator@4
+- task: reportgenerator@4
   displayName: ReportGenerator
   inputs:
     reports: 'Build/CodeCoverage_PS*.xml'

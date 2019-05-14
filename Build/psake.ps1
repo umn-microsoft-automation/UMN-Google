@@ -45,7 +45,7 @@ Task Test -Depends Init {
     Write-Warning "ModuleName = $moduleName"
 
     # Gather test results. Store them in a variable and file
-    $TestResults = Invoke-Pester -Path $ProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile "$ProjectRoot\Build\$TestFile" -CodeCoverageOutputFile "$ProjectRoot\Build\$CodeCoverageFile" -CodeCoverage "$ProjectRoot\*.ps1"
+    $TestResults = Invoke-Pester -Path $ProjectRoot\Tests -PassThru -OutputFormat NUnitXml -OutputFile "$ProjectRoot\Build\$TestFile" -CodeCoverageOutputFile "$ProjectRoot\Build\$CodeCoverageFile" -CodeCoverage "$ProjectRoot"
     [Net.ServicePointManager]::SecurityProtocol = $SecurityProtocol
 
     # In Appveyor?  Upload our tests! #Abstract this into a function?
