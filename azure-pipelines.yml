@@ -22,5 +22,6 @@ steps:
   inputs:
     codeCoverageTool: JaCoCo
     summaryFileLocation: 'Build/CodeCoverage_PS*.xml'
+    pathToSources: $(System.DefaultWorkingDirectory)
   displayName:  'Code Coverage'
   condition: succeededOrFailed()
