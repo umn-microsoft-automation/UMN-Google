@@ -1,0 +1,35 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pool:
+  vmImage: 'vs2017-win2016'
+
+steps:
+- powershell: .\Build\build.ps1
+  displayName: 'run build'
+
+- task: PublishTestResults@2
+  inputs:
+    testRunner: 'NUnit'
+    testResultsFiles: 'Build/TestResults_PS*.xml'
+    testRunTitle: 'Build Tests'
+  displayName: 'Build Tests'
+  condition: succeededOrFailed()
+
+- task: reportgenerator@4
+  displayName: ReportGenerator
+  inputs:
+    reports: 'Build/CodeCoverage_PS*.xml'
+    reporttypes: 'HtmlInline_AzurePipelines'
+    sourcedirs: .
+    targetdir: coveragereport
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: JaCoCo
+    summaryFileLocation: 'Build/CodeCoverage_PS*.xml'
+    reportDirectory: coveragereport
+  displayName:  'Code Coverage'
+  condition: succeededOrFailed()

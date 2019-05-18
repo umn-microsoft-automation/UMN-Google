@@ -1,7 +1,3 @@
-$projectRoot = Resolve-Path "$PSScriptRoot\.."
-$moduleRoot = Split-Path (Resolve-Path "$projectRoot\*.psd1")
-$moduleName = Split-Path $moduleRoot -Leaf
-
 Describe "General project validation: $moduleName" {
 
     $scripts = Get-ChildItem $moduleRoot -Include *.ps1,*.psm1,*.psd1 -Recurse

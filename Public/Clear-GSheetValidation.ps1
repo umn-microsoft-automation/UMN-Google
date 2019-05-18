@@ -28,7 +28,8 @@ function Clear-GSheetValidation
         .PARAMETER endColumnIndex
            The end column (exclusive) of the range if not send will end at last column (Using GridRange Object https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets/other#GridRange)
 
-        .EXAMPLE Clear-GSheetValidation -accessToken $accessToken -sheetName 'Sheet1' -spreadSheetID $spreadSheetID -startRowIndex 1 -endRowIndex 10 -startColumnIndex 9 -EndColumnIndex 10 
+        .EXAMPLE
+            Clear-GSheetValidation -accessToken $accessToken -sheetName 'Sheet1' -spreadSheetID $spreadSheetID -startRowIndex 1 -endRowIndex 10 -startColumnIndex 9 -EndColumnIndex 10 
             
         
     #>
