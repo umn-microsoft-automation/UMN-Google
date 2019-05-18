@@ -31,7 +31,7 @@ function ConvertTo-Base64URL
 
         .DESCRIPTION
             Used for preparing the JWT token to a proper format.
-        
+
         .PARAMETER bytes
             The bytes to be converted
 
@@ -48,7 +48,7 @@ function ConvertTo-Base64URL
     (
         [Parameter(ParameterSetName='Bytes')]
         [System.Byte[]]$Bytes,
-        
+
         [Parameter(ParameterSetName='String')]
         [string]$text
     )
@@ -75,7 +75,7 @@ function ConvertTo-Base64URL
 
                 .DESCRIPTION
                     This is used in server-server OAuth token generation
-                
+
                 .PARAMETER certPath
                     Local or network path to .p12 used to sign the JWT token
 
@@ -87,7 +87,7 @@ function ConvertTo-Base64URL
 
                 .PARAMATER scope
                     The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
-                        
+
                 .EXAMPLE
                     Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
 
@@ -103,7 +103,7 @@ function ConvertTo-Base64URL
 
                 [Parameter(Mandatory)]
                 [string]$iss,
-                
+
                 [Parameter(Mandatory)]
                 [string]$scope
             )
@@ -118,11 +118,11 @@ function ConvertTo-Base64URL
                 $headerBase64 = ConvertTo-Base64URL -text $headerJSON
             }
             Process
-            {        
+            {
                 # Build claims for JWT
                 $now = (Get-Date).ToUniversalTime()
                 $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-                $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s")) 
+                $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s"))
                 $aud = "https://www.googleapis.com/oauth2/v4/token"
                 $claimsJSON = [Ordered]@{
                     iss = $iss
@@ -136,15 +136,15 @@ function ConvertTo-Base64URL
 
                 ################# Create JWT
                 # Prep JWT certificate signing
-                $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
-                $rsaPrivate = $googleCert.PrivateKey 
-                $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
+                $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable )
+                $rsaPrivate = $googleCert.PrivateKey
+                $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
                 $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
-                
-                # Signature is our base64urlencoded header and claims, delimited by a period. 
+
+                # Signature is our base64urlencoded header and claims, delimited by a period.
                 $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
                 $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
-                
+
                 # Build request
                 $jwt = $headerBase64 + "." + $claimsBase64 + "." + $signature
                 $fields = 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+$jwt
@@ -177,13 +177,13 @@ function Get-GFile
 
         .PARAMETER fileName
             Name of file to retrive ID for. Case sensitive
-        
+
         .PARAMETER fileID
             File ID.  Can be gotten from Get-GFileID
 
         .PARAMETER outFilePath
-            Path to output file including file name.    
-        
+            Path to output file including file name.
+
         .EXAMPLE
             Get-GFile -accessToken $accessToken -fileName 'Name of some file'
 
@@ -221,7 +221,7 @@ function Get-GFile
     }
     End{}
 }
-#endregion 
+#endregion
 
 #region Get-GFileID
 function Get-GFileID
@@ -238,7 +238,7 @@ function Get-GFileID
 
         .PARAMETER fileName
             Name of file to retrive ID for. Case sensitive
-        
+
         .PARAMETER mimetype
             Use this to specify a specific mimetype.  See google docs https://developers.google.com/drive/api/v3/search-parameters
         .EXAMPLE
@@ -265,7 +265,7 @@ function Get-GFileID
         $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
         if ($mimetype){$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | Where-Object {$_.mimetype -eq $mimetype}).id}
         else{$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files)).id}
-        
+
         # Logic on multiple IDs being returned
         If ($fileID.count -eq 0){Write-Warning "There are no files matching the name $fileName"}
         If ($fileID.count -gt 1){Write-Warning "There are $($fileID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($fileID)}
@@ -273,7 +273,7 @@ function Get-GFileID
     }
     End{}
 }
-#endregion 
+#endregion
 
 #region Permissions for Google Drive files
 
@@ -288,7 +288,7 @@ function Get-GFilePermissions
 
         .PARAMETER accessToken
             OAuth Access Token for authorization.
-                  
+
         .PARAMETER fileID
             The fileID to query.  This is returned when a new file is created.
 
@@ -343,7 +343,6 @@ function Get-GFilePermissions
 
     Process
     {
-        write-host $uri
         Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
     }
     End{}
@@ -360,7 +359,7 @@ function Move-GFile
 
         .PARAMETER accessToken
             OAuth Access Token for authorization.
-                  
+
         .PARAMETER fileID
             The fileID to move.
 
@@ -416,7 +415,7 @@ function Remove-GFilePermissions
 
         .PARAMETER accessToken
             OAuth Access Token for authorization.
-                  
+
         .PARAMETER fileID
             The fileID to query.  This is returned when a new file is created.
 
@@ -427,7 +426,7 @@ function Remove-GFilePermissions
             Remove-GFilePermissions -fileID 'String of File ID' -accessToken $accessToken -permissionID 'ID of the permission'
 
         .NOTES
-            A successfull removal returns no body data. 
+            A successfull removal returns no body data.
     #>
     [CmdletBinding()]
     Param
@@ -438,7 +437,7 @@ function Remove-GFilePermissions
         #[Alias("spreadSheetID")]
         [Parameter(Mandatory)]
         [string]$fileID,
-        
+
         [Parameter(Mandatory)]
         [string]$permissionID
 
@@ -471,7 +470,7 @@ function Set-GFilePermissions
 
         .PARAMETER emailAddress
             Email address of the user or group to grant permissions to
-        
+
         .PARAMETER fileID
             The fileID to apply permissions to.
 
@@ -495,17 +494,17 @@ function Set-GFilePermissions
     (
         [Parameter(Mandatory)]
         [string]$accessToken,
-        
+
         [Parameter(Mandatory)]
         [string]$emailAddress,
 
         #[Alias("spreadhSheetID")]
         [Parameter(Mandatory)]
         [string]$fileID,
-        
+
         [ValidateSet('writer','reader','commenter')]
         [string]$role = "writer",
-        
+
         [ValidateSet($true,$false)]
         [boolean]$sendNotificationEmail = $false,
 
@@ -534,7 +533,7 @@ function Update-GFilePermissions
 
         .DESCRIPTION
             Update Permissions on Google File
-     
+
         .PARAMETER accessToken
             access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
@@ -543,10 +542,10 @@ function Update-GFilePermissions
 
         .PARAMETER permissionID
             The permission ID of the entiry with permissions. Sett Get-GFilePermissions to get a lsit
-        
+
         .PARAMETER role
             Role to assign, select from 'writer','reader','commenter','Owner','Organizer'
-        
+
         .PARAMETER supportTeamDrives
             Boolean for TeamDrive Support
 
@@ -564,11 +563,11 @@ function Update-GFilePermissions
     (
         [Parameter(Mandatory)]
         [string]$accessToken,
-        
+
         #[Alias("spreadSheetID")]
         [Parameter(Mandatory)]
         [string]$fileID,
-        
+
         [Parameter(Mandatory)]
         [string]$permissionID,
 
@@ -606,30 +605,30 @@ function Update-GFilePermissions
         <#
             .Synopsis
                 Add named sheets to an existing spreadSheet file.
-        
+
             .DESCRIPTION
                 This function will add a specified sheet name to a google spreadsheet.
 
             .PARAMETER accessToken
                 access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
-        
+
             .PARAMETER sheetName
                 Name to apply to new sheet
-                
+
             .PARAMETER spreadSheetID
                 ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
-            
+
             .EXAMPLE
                 Add-GSheetSheet -accessToken $accessToken -sheetName 'NewName' -spreadSheetID $spreadSheetID
-        
+
         #>
         [CmdletBinding()]
         Param
         (
             [Parameter(Mandatory)]
             [string]$accessToken,
-            
+
             [Parameter(Mandatory)]
             [string]$sheetName,
 
@@ -674,21 +673,21 @@ function Update-GFilePermissions
                 ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
             .EXAMPLE
-                $pageID = 0  ## using pageID to differentiate from sheetID -- 
+                $pageID = 0  ## using pageID to differentiate from sheetID --
                 In this case, index 0 is the actual sheetID per the API and will be cleared.
 
                 $sheetID = ## the id number of the file/spreadsheet
 
                 clear-gsheet -pageID $pageID -sheetID $sheetID -accessToken $accessToken
 
-            
+
         #>
         [CmdletBinding()]
         Param
         (
             [Parameter(Mandatory)]
             [string]$accessToken,
-            
+
             [Parameter(Mandatory)]
             [string]$sheetName,
 
@@ -722,13 +721,13 @@ function Update-GFilePermissions
 
             .PARAMETER accessToken
                 access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
-            
+
             .PARAMETER cell
                 Required switch for getting all data, or a subset of cells.
 
             .PARAMETER rangeA1
                 Range in A1 notation https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx. The dimensions of the $values you put in MUST fit within this range
-            
+
             .PARAMETER sheetName
                 Name of sheet to data from
 
@@ -743,20 +742,20 @@ function Update-GFilePermissions
 
             .EXAMPLE
                 Get-GSheetData -accessToken $accessToken -cell 'Range' -rangeA1 'A0:F77' -sheetName 'Sheet1' -spreadSheetID $spreadSheetID
-            
+
         #>
         [CmdletBinding()]
         Param
         (
             [Parameter(Mandatory)]
             [string]$accessToken,
-            
+
             [Parameter(Mandatory)]
             [ValidateSet('AllData','Range')]
             [string]$cell,
 
             [string]$rangeA1,
-            
+
             [Parameter(Mandatory)]
             [string]$sheetName,
 
@@ -781,14 +780,14 @@ function Update-GFilePermissions
             $uri += "?valueRenderOption=$valueRenderOption"
 
             $result = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
-            
+
             # Formatting the returned data
             $sheet = $result.values
             $Rows = $sheet.Count
             $Columns = $sheet[0].Count
             $HeaderRow = 0
             $Header = $sheet[0]
-            foreach ($Row in (($HeaderRow + 1)..($Rows-1))) { 
+            foreach ($Row in (($HeaderRow + 1)..($Rows-1))) {
                 $h = [Ordered]@{}
                 foreach ($Column in 0..($Columns-1)) {
                     if ($sheet[0][$Column].Length -gt 0) {
@@ -814,7 +813,7 @@ function Get-GSheetSheetID
 
         .PARAMETER accessToken
             access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
-        
+
         .PARAMETER sheetName
             The name of the sheet
 
@@ -822,7 +821,7 @@ function Get-GSheetSheetID
             ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
         .EXAMPLE
-            Get-GSheetSheetID -accessToken $accessToken -sheetName 'Sheet1' -spreadSheetID $spreadSheetID  
+            Get-GSheetSheetID -accessToken $accessToken -sheetName 'Sheet1' -spreadSheetID $spreadSheetID
     #>
     [CmdletBinding()]
     Param
@@ -862,7 +861,7 @@ function Get-GSheetSheetID
 
             .PARAMETER fileName
                 Name of file to retrive ID for. Case sensitive
-            
+
             .EXAMPLE
                 Get-GSheetSpreadSheetID -accessToken $accessToken -fileName 'Name of some file'
         #>
@@ -873,7 +872,7 @@ function Get-GSheetSheetID
             [string]$accessToken,
             [Parameter(Mandatory)]
 
-            [Alias("spreadSheetName")] 
+            [Alias("spreadSheetName")]
             [string]$fileName
         )
 
@@ -946,7 +945,7 @@ function Move-GSheetData
 
         .PARAMETER query
             Value to be queried for in specified column (see columnKey) $query = 'Cell Content'
-        
+
         .PARAMETER spreadSheetID
             ID for the target Spreadsheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
@@ -965,10 +964,10 @@ function Move-GSheetData
 
         [Parameter(Mandatory)]
         [string]$destinationSheetName,
-        
+
         [Parameter(Mandatory)]
         [string]$query,
-        
+
         [Parameter(Mandatory)]
         [string]$sourceSheetName,
 
@@ -986,7 +985,7 @@ function Move-GSheetData
 
         ## Get row query belongs to
         $Index = (0..($data.count -1) | where {$Data[$_].$columnKey -eq $query})
-        
+
         ## Sanity Check - is this the data?
         if (-not $Index) {
             write-Warning "$Query in $columnKey does not exist"
@@ -994,7 +993,7 @@ function Move-GSheetData
             }
 
         Else {
-        $rowIndex = $index[0] + 2    
+        $rowIndex = $index[0] + 2
         $startRow = $Index[0] + 1
         $destinationRow = ($destinationData).count + 2
         $destinationStartRow = ($destinationData).count + 1
@@ -1004,24 +1003,24 @@ function Move-GSheetData
         $allSheetProperties = (Get-GSheetSpreadSheetProperties -spreadSheetID $spreadSheetID -accessToken $accessToken).sheets.properties
 
         $srcSheetIndex = ($allSheetProperties | where {$_.title -eq $sourceSheetName}).sheetID
-        $dstSheetIndex = ($allSheetProperties | where {$_.title -eq $destinationSheetName}).sheetID                                
+        $dstSheetIndex = ($allSheetProperties | where {$_.title -eq $destinationSheetName}).sheetID
 
         $method = 'POST'
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID"+":batchUpdate"
         $ContentType = "application/json"
-        
-   
-        ## cutPaste row to row 
+
+
+        ## cutPaste row to row
         $values = @{"cutPaste"=@{"source"=@{"sheetId"=$srcSheetIndex;"startRowIndex"=$startRow;"endRowIndex"=$rowIndex};"destination"=@{"sheetId"=$dstSheetIndex;"rowIndex"=$destinationRow};"pasteType"="PASTE_NORMAL"}}
         $JSON = @{"requests"=$values} |ConvertTo-Json -Depth 20
-            
-        
-        
+
+
+
         Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $ContentType -Headers @{"Authorization"="Bearer $accessToken"}
-        
+
     }
 }
-    
+
 #Get public and private function definition files.
 $Public  = @( Get-ChildItem -Path $PSScriptRoot\Public\*.ps1 -ErrorAction SilentlyContinue )
 $Private = @( Get-ChildItem -Path $PSScriptRoot\Private\*.ps1 -ErrorAction SilentlyContinue )
