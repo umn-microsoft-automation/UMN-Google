@@ -10,12 +10,12 @@ Describe "Help tests for UMN-Google" -Tags 'Build' {
     foreach($Function in $Functions){
         $help = Get-Help $Function.name
         Context $help.name {
-            it "Has a HelpUri" {
-                $Function.HelpUri | Should Not BeNullOrEmpty
-            }
-            It "Has related Links" {
-                $help.relatedLinks.navigationLink.uri.count | Should BeGreaterThan 0
-            }
+            #it "Has a HelpUri" {
+            #    $Function.HelpUri | Should Not BeNullOrEmpty
+            #}
+            #It "Has related Links" {
+            #    $help.relatedLinks.navigationLink.uri.count | Should BeGreaterThan 0
+            #}
             it "Has a description" {
                 $help.description | Should Not BeNullOrEmpty
             }

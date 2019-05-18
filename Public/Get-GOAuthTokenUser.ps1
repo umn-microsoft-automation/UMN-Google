@@ -1,4 +1,3 @@
-#region Get-GOAuthTokenUser
 function Get-GOAuthTokenUser
 {
     <#
@@ -78,7 +77,7 @@ function Get-GOAuthTokenUser
             $auth_string += "&response_type=code&prompt=consent"
             Write-Host "Please open this link on the machine you're running this cmdlet on"
             Write-Host $auth_string
-            $authorizationCode = New-GOAuthTokenCode -RedirectURI $redirectUri
+            $authorizationCode = New-GOAuthTokenCode -RedirectURI $redirectUri -matchString 'code=([^&]*)'
 
             # exchange the authorization code for a refresh token and access token
             $body = @{
@@ -115,5 +114,3 @@ function Get-GOAuthTokenUser
         return new-object psobject -Property $props
     }
 }
-
-#endregion

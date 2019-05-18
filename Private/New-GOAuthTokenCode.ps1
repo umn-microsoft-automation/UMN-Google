@@ -1,7 +1,9 @@
 function New-GOAuthTokenCode {
     param (
         [Parameter(Mandatory)]
-        [string]$RedirectURI
+        [string]$RedirectURI,
+        [Parameter(Mandatory)]
+        [string]$matchString
     )
     
     $listener = New-Object System.Net.HttpListener
@@ -27,6 +29,6 @@ You may close this page and return to your Powershell terminal
     $Context.Response.OutputStream.Write($Content, 0, $Content.Length)
     $Context.Response.Close()
     $listener.Stop()
-    $null = $URL -match 'code=([^&]*)'
+    $null = $URL -match $matchString
     $matches[1]
 }
