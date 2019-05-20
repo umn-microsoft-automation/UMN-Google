@@ -18,18 +18,19 @@ steps:
   displayName: 'Build Tests'
   condition: succeededOrFailed()
 
-- task: reportgenerator@4
-  displayName: ReportGenerator
-  inputs:
-    reports: 'Build/CodeCoverage_PS*.xml'
-    reporttypes: 'HtmlInline_AzurePipelines'
-    sourcedirs: .
-    targetdir: coveragereport
+#- task: reportgenerator@4
+#  displayName: ReportGenerator
+#  inputs:
+#    reports: 'Build/CodeCoverage_PS*.xml'
+#    reporttypes: 'HtmlInline_AzurePipelines'
+#    sourcedirs: .
+#    targetdir: coveragereport
+#--condition: succeededOrFailed()
 
 - task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: JaCoCo
     summaryFileLocation: 'Build/CodeCoverage_PS*.xml'
-    reportDirectory: coveragereport
+#    reportDirectory: coveragereport
   displayName:  'Code Coverage'
   condition: succeededOrFailed()
