@@ -968,7 +968,11 @@ function Update-GFilePermissions
                 foreach ($Column in 0..($Columns-1)) {
                     if ($sheet[0][$Column].Length -gt 0) {
                         $Name = $Header[$Column]
-                        $h.$Name = $Sheet[$Row][$Column]
+                        if ($sheet[$row].count -gt ($column)) {
+                            $h.$Name = $Sheet[$Row][$Column]
+                        } else {
+                            $h.$Name = ""
+                        }
                     }
                 }
                 [PSCustomObject]$h

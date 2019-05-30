@@ -1,7 +1,13 @@
 # UMN-Google
 
+## Update '1.2.9'
+
+Modify Get-GSheetData to set all empty properties of the returned object to an empty string instead of $null.
+Previously any empty value in a row after the last value would be $null but empty values before the last value would be an empty string.
+This makes the behavior consistent so empty values are always empty strings.
+
 ## Update '1.2.8'
-Add function Get-GOAuthIdToken -- Function returns a Google ID Toekn for a user for a given Client ID
+Add function Get-GOAuthIdToken -- Function returns a Google ID Token for a user for a given Client ID
 
 ## Update '1.2.7'
 Expand Get-GFilePermissions to get more details and get specific permissions if specified
