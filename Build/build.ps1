@@ -7,7 +7,7 @@ $VerbosePreference = 'Continue'
 Install-Module Psake, PSDeploy, BuildHelpers, Pester -Force
 Import-Module Psake, BuildHelpers
 
-#Set-BuildEnvironment
+Set-BuildEnvironment -verbose
 
 Invoke-psake -buildFile .\Build\psake.ps1 -taskList $Task -nologo
 exit ( [int]( -not $psake.build_success ) )
