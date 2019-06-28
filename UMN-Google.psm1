@@ -82,27 +82,33 @@ function ConvertTo-Base64URL
                 .PARAMETER certPswd
                     Password to access the private key in the .p12
 
+                .PARAMETER RSA
+                    Optional, provide the System.Security.Cryptography.RSACryptoServiceProvider object. Such as when retrived/prepared from a KeyVault.
+
                 .PARAMETER iss
                     This is the Google Service account address
 
-                .PARAMATER scope
+                .PARAMETER scope
                     The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
                         
                 .EXAMPLE
                     Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
 
+                .EXAMPLE
+                    Get-GOAuthTokenService -rsa $rsaSecurityObject -scope "https://www.googleapis.com/auth/spreadsheets" -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
+
             #>
             [CmdletBinding()]
             Param
             (
-                [Parameter(Mandatory)]
                 [string]$certPath,
 
-                [Parameter(Mandatory)]
                 [string]$certPswd,
 
                 [Parameter(Mandatory)]
                 [string]$iss,
+
+                $rsa,
                 
                 [Parameter(Mandatory)]
                 [string]$scope
@@ -136,11 +142,13 @@ function ConvertTo-Base64URL
 
                 ################# Create JWT
                 # Prep JWT certificate signing
-                $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
-                $rsaPrivate = $googleCert.PrivateKey 
-                $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
-                $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
-                
+                if(!$rsa){
+                    $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable ) 
+                    $rsaPrivate = $googleCert.PrivateKey 
+                    $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider 
+                    $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
+                }
+
                 # Signature is our base64urlencoded header and claims, delimited by a period. 
                 $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
                 $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
@@ -1164,7 +1172,7 @@ function Move-GSheetData
         $destinationData = Get-GSheetData -spreadSheetID $spreadSheetID -accessToken $accessToken -sheetName $destinationSheetName -cell AllData
 
         ## Get row query belongs to
-        $Index = (0..($data.count -1) | where {$Data[$_].$columnKey -eq $query})
+        $Index = (0..($data.count -1) | where-object {$Data[$_].$columnKey -eq $query})
         
         ## Sanity Check - is this the data?
         if (-not $Index) {
@@ -1182,8 +1190,8 @@ function Move-GSheetData
         ## Get sheet index ID numbers
         $allSheetProperties = (Get-GSheetSpreadSheetProperties -spreadSheetID $spreadSheetID -accessToken $accessToken).sheets.properties
 
-        $srcSheetIndex = ($allSheetProperties | where {$_.title -eq $sourceSheetName}).sheetID
-        $dstSheetIndex = ($allSheetProperties | where {$_.title -eq $destinationSheetName}).sheetID                                
+        $srcSheetIndex = ($allSheetProperties | where-object {$_.title -eq $sourceSheetName}).sheetID
+        $dstSheetIndex = ($allSheetProperties | where-object {$_.title -eq $destinationSheetName}).sheetID                                
 
         $method = 'POST'
         $uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID"+":batchUpdate"

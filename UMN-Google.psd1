@@ -28,7 +28,7 @@
 RootModule = 'UMN-Google.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.9'
+ModuleVersion = '1.2.10'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -123,7 +123,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-         ReleaseNotes = 'Modify Get-GSheetData to set all empty properties of the returned object to an empty string instead of $null.'
+         ReleaseNotes = 'Support providing an RSA Security object instead of building it within the function.'
 
     } # End of PSData hashtable
 
