@@ -101,17 +101,21 @@ function ConvertTo-Base64URL
             [CmdletBinding()]
             Param
             (
-                [string]$certPath,
-
-                [string]$certPswd,
-
                 [Parameter(Mandatory)]
                 [string]$iss,
 
-                $rsa,
-                
                 [Parameter(Mandatory)]
-                [string]$scope
+                [string]$scope,
+
+                [Parameter(Mandatory,ParameterSetName='Certificate')]
+                [string]$certPath,
+
+                [Parameter(Mandatory,ParameterSetName='Certificate')]
+                [string]$certPswd,
+
+                [Parameter(Mandatory,ParameterSetName='RSA')]
+                $rsa
+
             )
 
             Begin
