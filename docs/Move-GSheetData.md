@@ -64,7 +64,7 @@ Accept wildcard characters: False
 ```
 
 ### -destinationSheetName
-{{Fill destinationSheetName Description}}
+{{ Fill destinationSheetName Description }}
 
 ```yaml
 Type: String
@@ -94,7 +94,7 @@ Accept wildcard characters: False
 ```
 
 ### -sourceSheetName
-{{Fill sourceSheetName Description}}
+{{ Fill sourceSheetName Description }}
 
 ```yaml
 Type: String

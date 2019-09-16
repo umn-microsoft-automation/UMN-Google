@@ -8,7 +8,7 @@ schema: 2.0.0
 # Get-GOAuthTokenService
 
 ## SYNOPSIS
-{{Fill in the Synopsis}}
+Get google auth 2.0 token for a service account
 
 ## SYNTAX
 
@@ -28,21 +28,39 @@ Get-GOAuthTokenService -iss <String> -scope <String> -rsa <RSACryptoServiceProvi
 ```
 
 ## DESCRIPTION
-{{Fill in the Description}}
+This is used in server-server OAuth token generation
+This function will use a certificate to generate an RSA token that will be used to sign a JWT token which is needed to generate the access key.
+The certificate can be specified as file path and password to read the certificate from.
+It can also be specified as an object, such was when running in Automation that will return a certificate object
+The RSA token can also be specified directly if needed instead of generating it from a certificate
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 ```
-PS C:\> {{ Add example code here }}
+Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
 ```
 
-{{ Add example description here }}
+Generates an access token using the given certificate file and password
+
+### EXAMPLE 2
+```
+Get-GOAuthTokenService -rsa $rsaSecurityObject -scope "https://www.googleapis.com/auth/spreadsheets" -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
+```
+
+Generates an access token using the given rsa object
+
+### EXAMPLE 3
+```
+Get-GOAuthTokenService -certObj $GoogleCert -scope "https://www.googleapis.com/auth/spreadsheets" -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
+```
+
+Generates an access token using the given certificate object
 
 ## PARAMETERS
 
 ### -iss
-{{Fill iss Description}}
+This is the Google Service account address
 
 ```yaml
 Type: String
@@ -57,7 +75,8 @@ Accept wildcard characters: False
 ```
 
 ### -scope
-{{Fill scope Description}}
+The API scopes to be included in the request.
+Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
 
 ```yaml
 Type: String
@@ -72,7 +91,7 @@ Accept wildcard characters: False
 ```
 
 ### -certPath
-{{Fill certPath Description}}
+Local or network path to .p12 used to sign the JWT token, requires certPswd to also be specified
 
 ```yaml
 Type: String
@@ -87,7 +106,7 @@ Accept wildcard characters: False
 ```
 
 ### -certPswd
-{{Fill certPswd Description}}
+Password to access the private key in the .p12, requires certPath to also be specified
 
 ```yaml
 Type: String
@@ -117,7 +136,7 @@ Accept wildcard characters: False
 ```
 
 ### -rsa
-Optional, provide the System.Security.Cryptography.RSACryptoServiceProvider object. Such as when retrived/prepared from a KeyVault.
+provide the System.Security.Cryptography.RSACryptoServiceProvider object directly that will be used to sign the JWT token
 
 ```yaml
 Type: RSACryptoServiceProvider
@@ -136,11 +155,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
-
 ## OUTPUTS
-
-### System.Object
 
 ## NOTES
 

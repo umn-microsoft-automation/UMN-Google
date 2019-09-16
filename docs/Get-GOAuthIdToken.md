@@ -5,32 +5,31 @@ online version:
 schema: 2.0.0
 ---
 
-# Remove-GFilePermissions
+# Get-GOAuthIdToken
 
 ## SYNOPSIS
-Remove Permissions on Google Drive File
+Get Valid OAuth ID token for a user.
 
 ## SYNTAX
 
 ```
-Remove-GFilePermissions [-accessToken] <String> [-fileID] <String> [-permissionID] <String>
- [<CommonParameters>]
+Get-GOAuthIdToken [-clientID] <String> [-redirectUri] <String> [-scope] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Remove Permission ID list on Google File
+The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Remove-GFilePermissions -fileID 'String of File ID' -accessToken $accessToken -permissionID 'ID of the permission'
+Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
 ```
 
 ## PARAMETERS
 
-### -accessToken
-OAuth Access Token for authorization.
+### -clientID
+Client ID within app project
 
 ```yaml
 Type: String
@@ -44,9 +43,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -fileID
-The fileID to query. 
-This is returned when a new file is created.
+### -redirectUri
+An https project redirect.
+Can be anything as long as https
 
 ```yaml
 Type: String
@@ -60,8 +59,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -permissionID
-{{ Fill permissionID Description }}
+### -scope
+The API scopes to be included in the request.
+Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
 
 ```yaml
 Type: String
@@ -82,7 +82,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Array
 ## NOTES
-A successfull removal returns no body data.
+Requires GUI with Internet Explorer to get first token.
 
 ## RELATED LINKS
