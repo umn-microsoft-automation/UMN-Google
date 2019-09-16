@@ -1,5 +1,9 @@
 # UMN-Google
 
+## Update '1.2.10'
+Updated Get-GOAuthTokenService to accept a RSA object instead of building it within the function. Intended for use with KeyVaults and Automation.
+Also added support to build the RSA object with a certificate object rather than file path, also intended for use with KeyVaults and Automation.
+
 ## Update '1.2.9'
 
 Modify Get-GSheetData to set all empty properties of the returned object to an empty string instead of $null.

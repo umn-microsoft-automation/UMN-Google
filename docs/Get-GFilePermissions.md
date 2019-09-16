@@ -24,7 +24,7 @@ Get Permission ID list on Google File
 
 ### EXAMPLE 1
 ```
-Get-GFilePermissions -fileID 'String of File ID'
+Get-GFilePermissions -accessToken $accessToken -fileID 'String of File ID' -permissionID 'String of Permission ID'
 ```
 
 ## PARAMETERS
@@ -76,7 +76,8 @@ Accept wildcard characters: False
 ```
 
 ### -DefaultFields
-If specified, will only query "default" rather than querying all fields of Permission object.  Added primarily for backwards compatibility
+If specified, will only query "default" rather than querying all fields of Permission object. 
+Added primarily for backwards compatibility
 
 ```yaml
 Type: SwitchParameter
@@ -91,12 +92,16 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see about_CommonParameters (http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ## OUTPUTS
 
+### If only a fileID, this will return an object with two properties, the first is kind, and will always be drive#permissionList
+### The second will be permissions, which includes the individual permissions objects.  Each one of these will have the same format as if a specific PermissionID was requested
+### If a permissionID is also specified, only that specific permission will be returned.  It will have a kind property of drive#permission as well as all properties of that specific permission.
+### More details on the permission object available here: https://developers.google.com/drive/api/v2/reference/permissions
 ## NOTES
 
 ## RELATED LINKS

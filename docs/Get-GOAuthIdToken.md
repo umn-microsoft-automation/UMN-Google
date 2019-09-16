@@ -5,33 +5,31 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GSheetSpreadSheetID
+# Get-GOAuthIdToken
 
 ## SYNOPSIS
-Get a spreadsheet ID.
+Get Valid OAuth ID token for a user.
 
 ## SYNTAX
 
 ```
-Get-GSheetSpreadSheetID [-accessToken] <String> [-fileName] <String> [<CommonParameters>]
+Get-GOAuthIdToken [-clientID] <String> [-redirectUri] <String> [-scope] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Provide a case sensative file name to the function to get back the sheetID used in many other API calls.
-mimeTymes are split out to only retrieve spreadSheet IDs (no folders or other files)
+The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GSheetSpreadSheetID -accessToken $accessToken -fileName 'Name of some file'
+Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
 ```
 
 ## PARAMETERS
 
-### -accessToken
-access token used for authentication. 
-Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+### -clientID
+Client ID within app project
 
 ```yaml
 Type: String
@@ -45,17 +43,33 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -fileName
-Name of file to retrive ID for.
-Case sensitive
+### -redirectUri
+An https project redirect.
+Can be anything as long as https
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: spreadSheetName
+Aliases:
 
 Required: True
 Position: 2
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -scope
+The API scopes to be included in the request.
+Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -68,6 +82,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Array
 ## NOTES
+Requires GUI with Internet Explorer to get first token.
 
 ## RELATED LINKS
