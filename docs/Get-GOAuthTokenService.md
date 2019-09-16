@@ -12,9 +12,19 @@ schema: 2.0.0
 
 ## SYNTAX
 
+### CertificateFile
 ```
-Get-GOAuthTokenService [[-certPath] <String>] [[-certPswd] <String>] [-iss] <String> [[-rsa] <Object>]
- [-scope] <String> [<CommonParameters>]
+Get-GOAuthTokenService -iss <String> -scope <String> -certPath <String> -certPswd <String> [<CommonParameters>]
+```
+
+### CertificateObject
+```
+Get-GOAuthTokenService -iss <String> -scope <String> -certObj <X509Certificate2> [<CommonParameters>]
+```
+
+### RSA
+```
+Get-GOAuthTokenService -iss <String> -scope <String> -rsa <RSACryptoServiceProvider> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -31,36 +41,6 @@ PS C:\> {{ Add example code here }}
 
 ## PARAMETERS
 
-### -certPath
-{{Fill certPath Description}}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -certPswd
-{{Fill certPswd Description}}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -iss
 {{Fill iss Description}}
 
@@ -70,22 +50,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -rsa
-Optional, provide the System.Security.Cryptography.RSACryptoServiceProvider object. Such as when retrived/prepared from a KeyVault.
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -100,7 +65,67 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 5
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -certPath
+{{Fill certPath Description}}
+
+```yaml
+Type: String
+Parameter Sets: CertificateFile
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -certPswd
+{{Fill certPswd Description}}
+
+```yaml
+Type: String
+Parameter Sets: CertificateFile
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -certObj
+Certificate object that will be used to sign the JWT token
+
+```yaml
+Type: X509Certificate2
+Parameter Sets: CertificateObject
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -rsa
+Optional, provide the System.Security.Cryptography.RSACryptoServiceProvider object. Such as when retrived/prepared from a KeyVault.
+
+```yaml
+Type: RSACryptoServiceProvider
+Parameter Sets: RSA
+Aliases:
+
+Required: True
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
