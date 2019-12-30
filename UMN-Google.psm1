@@ -447,23 +447,16 @@ function Get-GFileID
     <#
         .Synopsis
             Get a Google File ID.
-
         .DESCRIPTION
             Provide a case sensative file name to the function to get back the gFileID used in many other API calls.
-
         .PARAMETER accessToken
             access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
-
         .PARAMETER fileName
             Name of file to retrive ID for. Case sensitive
-
         .PARAMETER mimetype
             Use this to specify a specific mimetype.  See google docs https://developers.google.com/drive/api/v3/search-parameters
         .EXAMPLE
             Get-GFileID -accessToken $accessToken -fileName 'Name of some file'
-
-        .NOTES
-            Written by Travis Sobeck
     #>
     [CmdletBinding()]
     Param
@@ -481,8 +474,10 @@ function Get-GFileID
     Process
     {
         $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
-        if ($mimetype){$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | Where-Object {$_.mimetype -eq $mimetype}).id}
-        else{$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files)).id}
+        $response=Invoke-GWrapper -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
+
+        if ($mimetype){$fileID=(($response.files)|Where-Object {$_.mimetype -eq $mimetype}).id}
+        else{$fileID = ($response.files).id}
 
         # Logic on multiple IDs being returned
         If ($fileID.count -eq 0){Write-Warning "There are no files matching the name $fileName"}
@@ -1707,6 +1702,79 @@ function Set-GSheetData
         End{}
     }
 #endregion
-#endregion
+
+#region invoke wrapper
+function Invoke-GWrapper
+{
+    <#
+        .Synopsis
+            Wraps any invoke-restmethod in a retry wrapper
+
+        .DESCRIPTION
+            Finding many Google APIs fail for many non critical reasons.
+
+        .PARAMETER uri
+            The uri to be invoked
+        .PARAMETER headers
+            The provided header
+        .PARAMETER method
+            The method to invoke
+        .PARAMETER body
+            A hashtable body
+
+        .EXAMPLE
+            Invoke-GWrapper -uri $uri -header $header
+    #>
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)]
+        [string]
+        $uri,
+
+        [Parameter(Mandatory=$true)]
+        [hashtable]
+        $headers,
+
+        [Parameter(Mandatory=$true)]
+        [ValidateSet("get","post","patch","delete")]
+        $method,
+
+        [hashtable]
+        $body
+    )
+
+    Begin{
+        $completed = $false
+        [int]$retrycount = 0
+        [int]$SecondsDelay = 5
+        [int]$retries = 5
+
+        if ($body) {
+            $bodyJson = $body | ConvertTo-Json -Depth 10
+            Write-Verbose -Message "Method set to: Post"
+        }
+     }
+    Process
+    {
+        while (-not $completed) {
+            try{
+                If($bodyJson){$response = Invoke-RestMethod -Uri $uri -Headers $header -Body $bodyJson -Method $method}
+                Else{$response = Invoke-RestMethod -Uri $uri -Headers $headers -Method $method}
+                $completed = $true
+            }
+            catch {
+                if ($retrycount -ge $Retries) {
+                    throw
+                }
+                else {
+                    Start-Sleep $SecondsDelay
+                    $retrycount++
+                    $secondsDelay = $SecondsDelay * $retryCount
+                }
+            }
+        }
+    }
+    End{return $response}
+}
 
 Export-ModuleMember -Function *

@@ -1,5 +1,9 @@
 # UMN-Google
 
+## Update '1.2.11'
+Added function Invoke-GWrapper which is a wrapper function to keep trying invoke-RestMethod 5 times. Get-GFileID is the first function to use this.
+Additional functions may be modified as needed to wrap invoke-restmethod.
+
 ## Update '1.2.10'
 Updated Get-GOAuthTokenService to accept a RSA object instead of building it within the function. Intended for use with KeyVaults and Automation.
 Also added support to build the RSA object with a certificate object rather than file path, also intended for use with KeyVaults and Automation.
