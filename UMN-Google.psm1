@@ -993,7 +993,7 @@ function Update-GFilePermissions
 
             $uri += "?valueRenderOption=$valueRenderOption"
 
-            $result = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
+            $result = Invoke-GWrapper -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
 
             # Formatting the returned data
             $sheet = $result.values
