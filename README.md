@@ -1,5 +1,8 @@
 # UMN-Google
 
+## Update '1.2.11'
+Get-GOAuthTokenUser previously only retuned part of token response.  Update returns full response and adds alias to 'accesstoken' to maintain backwards compatability.
+
 ## Update '1.2.10'
 Updated Get-GOAuthTokenService to accept a RSA object instead of building it within the function. Intended for use with KeyVaults and Automation.
 Also added support to build the RSA object with a certificate object rather than file path, also intended for use with KeyVaults and Automation.

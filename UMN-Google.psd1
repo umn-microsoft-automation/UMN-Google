@@ -28,7 +28,7 @@
 RootModule = 'UMN-Google.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.10'
+ModuleVersion = '1.2.11'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -123,7 +123,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-         ReleaseNotes = 'Support providing an RSA Security object instead of building it within the function.'
+         ReleaseNotes = 'Return full token response from Get-GOAuthTokenUser'
 
     } # End of PSData hashtable
 

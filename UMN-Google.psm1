@@ -287,27 +287,20 @@ function ConvertTo-Base64URL
                     $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
 
                     $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-
-                    $props = @{
-                        accessToken = $response.access_token
-                        refreshToken = $response.refresh_token
-                    }
                 }
                 else
                 {
                     # Exchange the refresh token for new tokens
                     $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
-
                     $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-                    $props = @{
-                        accessToken = $response.access_token
-                        refreshToken = $refreshToken
-                    }
+                    Add-Member -InputObject $response -NotePropertyName refreshToken -NotePropertyValue $refreshToken
                 }
             }
             End
             {
-                return new-object psobject -Property $props
+                # add alias for backwards compatability
+                Add-Member -InputObject $response -MemberType AliasProperty -Name accesstoken -Value access_token
+                return $response
             }
         }
     #endregion
