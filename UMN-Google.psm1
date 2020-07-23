@@ -5,7 +5,7 @@
 ###############
 
 ###
-# Copyright 2017 University of Minnesota, Office of Information Technology
+# Copyright 2020 University of Minnesota, Office of Information Technology
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1700,6 +1700,189 @@ function Set-GSheetData
         End{}
     }
 #endregion
+#endregion
+
+#region App Scripts and Projects
+function Get-gAppScriptsProject
+{
+    <#
+        .Synopsis
+            Get information about a google App Script project
+
+        .DESCRIPTION
+            Provide scriptID to get google project info for Google Apps Script
+
+        .PARAMETER accessToken
+            OAuth Access Token for authorization.
+
+        .PARAMETER scriptID
+            The scriptID to query. Found as a project property.
+
+        .EXAMPLE
+            Get-gAppScriptsProject -scriptID $scriptID -accessToken $accessToken
+        .OUTPUTS
+
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [Parameter(Mandatory)]
+        [string]$scriptID
+    )
+
+    Begin
+    {
+        $uri = "https://script.googleapis.com/v1/projects/$scriptID"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+
+    Process
+    {
+        Invoke-RestMethod -Method get -Uri $uri -Headers $headers
+    }
+    End{}
+}
+
+function Get-gAppScriptsProjectContent
+{
+    <#
+        .Synopsis
+            Get content  about a google App Script project
+
+        .DESCRIPTION
+            Provide scriptID to get google project content for Google Apps Script
+
+        .PARAMETER accessToken
+            OAuth Access Token for authorization.
+
+        .PARAMETER scriptID
+            The scriptID to query. Found as a project property.
+
+        .EXAMPLE
+            Get-gAppScriptsProjectContent -scriptID $scriptID -accessToken $accessToken
+
+        .OUTPUTS
+            Provides the actual scripts of the project.
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [Parameter(Mandatory)]
+        [string]$scriptID
+    )
+
+    Begin
+    {
+        $uri = "https://script.googleapis.com/v1/projects/$scriptID/content"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+
+    Process
+    {
+        Invoke-RestMethod -Method get -Uri $uri -Headers $headers
+    }
+    End{}
+}
+
+function send-gAppsScriptFunction
+{
+    <#
+        .Synopsis
+            Send parameters to a Google App Scripts Function by name
+
+        .DESCRIPTION
+            Call and send parameters to a Google App Scripts Function by name.
+
+        .PARAMETER accessToken
+            OAuth Access Token for authorization.
+
+        .PARAMETER scriptID
+            The scriptID associated to the Google App Scripts project.
+
+        .PARAMETER requestBody
+            The parameters to be passed to the Google App Script as a JSON object
+            {
+                "function": string,
+                "parameters": [
+                    $scriptID
+                ],
+                "devMode": boolean
+            }
+        .EXAMPLE
+            send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID -requestBody $requestbody
+
+        .EXAMPLE
+            send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID
+
+        .EXAMPLE
+            test.gs script in project
+
+            function DeleteTrigger(formid){
+                triggers = ScriptApp.getProjectTriggers()
+                for (var i = 0; i < triggers.length; i++) {
+                    if (triggers[i].getTriggerSourceId() == formid) {
+                    ScriptApp.deleteTrigger(triggers[i])
+                    Logger.log("deleted " + formid)
+                    }
+                }
+            }
+
+            Sample $RequestBody for above Function in .gs
+            {
+                "function": DeleteTrigger,
+                "parameters": [
+                    actualFormIDToPassIntoFunction
+                ],
+                "devMode": boolean
+            }
+
+        .OUTPUTS
+            The following may come up if you did not publish the App Script as API Executable.
+            "error": {
+            "code": 404,
+            "message": "Requested entity was not found.",
+            "status": "NOT_FOUND"
+
+        .OUTPUTS
+                done response
+                ---- --------
+                True @{@type=type.googleapis.com/google.apps.script.v1.ExecutionResponse}
+
+}
+    #>
+    [CmdletBinding()]
+    Param
+    (
+        [Parameter(Mandatory)]
+        [string]$accessToken,
+
+        [Parameter(Mandatory)]
+        [string]$scriptID,
+
+        [string]$requestBody
+    )
+
+    Begin
+    {
+        $uri = "https://script.googleapis.com/v1/scripts/$scriptID"+":run"
+        $headers = @{"Authorization"="Bearer $accessToken"}
+    }
+
+    Process
+    {
+        If($requestBody){$return = Invoke-RestMethod -Method post -Uri $uri -Headers $headers -Body $requestBody -ContentType 'application/json'}
+        Else{$return = Invoke-RestMethod -Method post -Uri $uri -Headers $headers}
+    }
+    End{
+        return $return
+    }
+}
 #endregion
 
 Export-ModuleMember -Function *

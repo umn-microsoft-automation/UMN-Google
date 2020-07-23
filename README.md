@@ -1,5 +1,8 @@
 # UMN-Google
 
+## Update '1.2.12'
+Added get-gAppScriptsProject, get-gAppScriptsProjectContent, and send-gAppsScriptFunction. The last function is designed to call functions stored in a Google App Scripts Standard Project. You need to make sure to publish 'Deploy as API Executable' and Enable API access to your project. Allows calling functions with or without parameters.
+
 ## Update '1.2.11'
 Get-GOAuthTokenUser previously only retuned part of token response.  Update returns full response and adds alias to 'accesstoken' to maintain backwards compatability.
 
