@@ -1826,7 +1826,7 @@ function send-gAppsScriptFunction
                 Optional paramteter to pass through to the google function.
 
         .PARAMETER devMode
-                Optional boolean flag for dev mode. If true and the user is an owner of the script, the script runs at the most recently saved version.
+                Optional true/false flag for dev mode. If true and the user is an owner of the script, the script runs at the most recently saved version.
 
         .EXAMPLE
             Execute a function by providing your own hashtable.
@@ -1839,6 +1839,11 @@ function send-gAppsScriptFunction
         .EXAMPLE
             Execute a function by name with a paramter to pass into the Google App Script function.
             send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID -function DeleteTrigger -parameter formID1234fjdnejf
+
+        .EXAMPLE
+            Execute a function by name with a paramter to pass into the Google App Script function using Dev mode (Last saved script version instead of latest published)
+            send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID -function DeleteTrigger -parameter formID1234fjdnejf -DevMode true
+
 
         .EXAMPLE
             test.gs script in project
@@ -1859,7 +1864,7 @@ function send-gAppsScriptFunction
                     "parameters"=@(
                     $item
                     );
-                    "devMode"= $false
+                    "devMode"= 'false'
                 }
 
         .OUTPUTS
@@ -1903,8 +1908,8 @@ function send-gAppsScriptFunction
         [string]$parameter,
 
         [Parameter(ParameterSetName = 'Body Options')]
-        [boolean]$devMode = $false
-
+        [ValidateSet("false","true")]
+        [string]$devMode = "false"
     )
 
     Begin
