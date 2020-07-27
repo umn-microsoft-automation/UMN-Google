@@ -1741,7 +1741,7 @@ function Get-gAppScriptsProject
 
     Process
     {
-        Invoke-RestMethod -Method get -Uri $uri -Headers $headers
+        Invoke-RestMethod -Method get -Uri $uri -Headers $headers -UseBasicParsing
     }
     End{}
 }
@@ -1785,7 +1785,7 @@ function Get-gAppScriptsProjectContent
 
     Process
     {
-        Invoke-RestMethod -Method get -Uri $uri -Headers $headers
+        Invoke-RestMethod -Method get -Uri $uri -Headers $headers -UseBasicParsing
     }
     End{}
 }
@@ -1806,19 +1806,39 @@ function send-gAppsScriptFunction
             The scriptID associated to the Google App Scripts project.
 
         .PARAMETER requestBody
-            The parameters to be passed to the Google App Script as a JSON object
-            {
-                "function": string,
-                "parameters": [
-                    $scriptID
-                ],
-                "devMode": boolean
-            }
+            The PSCustom Object or hashtable to be send to the Google App Scripts API. Will be converted to JSON string.
+
+            Example requestBody
+                $requestbody = @{
+                    "function"= 'DeleteTrigger';
+                    "parameters"=@(
+                    formID123fjn4
+                    );
+                    "devMode"= $false
+                }
+
+        .PARAMETER function
+                The google App Script function to be called.
+
+                Function name is CASE Sensitive.
+
+        .PARAMETER parameter
+                Optional paramteter to pass through to the google function.
+
+        .PARAMETER devMode
+                Optional boolean flag for dev mode. If true and the user is an owner of the script, the script runs at the most recently saved version.
+
         .EXAMPLE
+            Execute a function by providing your own hashtable.
             send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID -requestBody $requestbody
 
         .EXAMPLE
-            send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID
+            Execute a function with no parameters.
+            send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID -function CreateForm
+
+        .EXAMPLE
+            Execute a function by name with a paramter to pass into the Google App Script function.
+            send-gAppsScriptFunction -accessToken $accessToken -scriptID $scriptID -function DeleteTrigger -parameter formID1234fjdnejf
 
         .EXAMPLE
             test.gs script in project
@@ -1834,13 +1854,13 @@ function send-gAppsScriptFunction
             }
 
             Sample $RequestBody for above Function in .gs
-            {
-                "function": DeleteTrigger,
-                "parameters": [
-                    actualFormIDToPassIntoFunction
-                ],
-                "devMode": boolean
-            }
+            $requestbody = @{
+                    "function"= 'DeleteTrigger';
+                    "parameters"=@(
+                    $item
+                    );
+                    "devMode"= $false
+                }
 
         .OUTPUTS
             The following may come up if you did not publish the App Script as API Executable.
@@ -1854,6 +1874,13 @@ function send-gAppsScriptFunction
                 ---- --------
                 True @{@type=type.googleapis.com/google.apps.script.v1.ExecutionResponse}
 
+        .OUTPUTS
+                done error
+                ---- -----
+                True @{code=3; message=ScriptError; details=System.Object[]}
+                $return.error.details.errorMessage
+                Script function not found: ShowProperties
+
 }
     #>
     [CmdletBinding()]
@@ -1865,19 +1892,44 @@ function send-gAppsScriptFunction
         [Parameter(Mandatory)]
         [string]$scriptID,
 
-        [string]$requestBody
+        [Parameter(Mandatory, ParameterSetName = 'PSObject')]
+        [validateScript({$_.GetType().Fullname -in 'System.Management.Automation.PSCustomObject','System.Collections.Hashtable'})]
+        $requestBody,
+
+        [Parameter(Mandatory, ParameterSetName = 'Body Options')]
+        [string]$function,
+
+        [Parameter(ParameterSetName = 'Body Options')]
+        [string]$parameter,
+
+        [Parameter(ParameterSetName = 'Body Options')]
+        [boolean]$devMode = $false
+
     )
 
     Begin
     {
         $uri = "https://script.googleapis.com/v1/scripts/$scriptID"+":run"
         $headers = @{"Authorization"="Bearer $accessToken"}
+
+        If($requestbody){
+            $body = $requestbody |convertto-json
+        }
+
+        If($function){
+            $body = @{
+                "function"= $function;
+                "parameters"=@(
+                $parameter
+                );
+                "devMode"= $devMode
+            } |convertto-json
+        }
     }
 
     Process
     {
-        If($requestBody){$return = Invoke-RestMethod -Method post -Uri $uri -Headers $headers -Body $requestBody -ContentType 'application/json'}
-        Else{$return = Invoke-RestMethod -Method post -Uri $uri -Headers $headers}
+        $return = Invoke-RestMethod -Method post -Uri $uri -Headers $headers -Body $body -ContentType 'application/json' -UseBasicParsing
     }
     End{
         return $return
