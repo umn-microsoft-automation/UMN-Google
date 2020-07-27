@@ -1826,7 +1826,7 @@ function send-gAppsScriptFunction
                 Optional paramteter to pass through to the google function.
 
         .PARAMETER devMode
-                Optional true/false flag for dev mode. If true and the user is an owner of the script, the script runs at the most recently saved version.
+                Switch flag for dev mode. Run the last saved script instead of last published.
 
         .EXAMPLE
             Execute a function by providing your own hashtable.
@@ -1908,8 +1908,7 @@ function send-gAppsScriptFunction
         [string]$parameter,
 
         [Parameter(ParameterSetName = 'Body Options')]
-        [ValidateSet("false","true")]
-        [string]$devMode = "false"
+        [switch]$devMode
     )
 
     Begin
@@ -1927,7 +1926,7 @@ function send-gAppsScriptFunction
                 "parameters"=@(
                 $parameter
                 );
-                "devMode"= $devMode
+                "devMode"= [bool]$devMode
             } |convertto-json
         }
     }
