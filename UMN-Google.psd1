@@ -28,7 +28,7 @@
 RootModule = 'UMN-Google.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.2.11'
+ModuleVersion = '1.2.12'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -43,7 +43,7 @@ Author = 'Travis Sobeck, Peter Bajurny, Kyle Weeks'
 CompanyName = 'University of Minnesota'
 
 # Copyright statement for this module
-Copyright = '(c) 2016 University of Minnesota. All rights reserved.'
+Copyright = '(c) 2020 University of Minnesota. All rights reserved.'
 
 # Description of the functionality provided by this module
 Description = 'Powershell wrapper to interact with Google API'
@@ -123,7 +123,7 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-         ReleaseNotes = 'Return full token response from Get-GOAuthTokenUser'
+         ReleaseNotes = 'Get Google App Script Project content. Call Google App Script functions.'
 
     } # End of PSData hashtable
 
