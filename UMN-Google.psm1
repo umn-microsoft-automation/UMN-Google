@@ -1543,6 +1543,9 @@ function Set-GSheetData
         .PARAMETER values
             The values to write to the sheet. This should be an array list.  Each list array represents one ROW on the sheet.
 
+        .PARAMETER contenttype
+            The contenttype specifies the content type of the web request. Default value is 'application/json'.
+
         .EXAMPLE
             Set-GSheetData -accessToken $accessToken -rangeA1 'A1:B2' -sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values @(@("a","b"),@("c","D"))
 
@@ -1571,7 +1574,9 @@ function Set-GSheetData
         [string]$valueInputOption = 'RAW',
 
         [Parameter(Mandatory)]
-        [System.Collections.ArrayList]$values
+        [System.Collections.ArrayList]$values,
+
+        [string]$contenttype = 'application/json'
     )
 
     Begin
@@ -1591,7 +1596,7 @@ function Set-GSheetData
     Process
     {
         $json = @{values=$values} | ConvertTo-Json
-        Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
+        Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $contenttype -Headers @{"Authorization"="Bearer $accessToken"}
     }
 
     End{}
