@@ -1,4 +1,4 @@
-﻿###############
+###############
 # Module for interacting with Google API
 # More details found at https://developers.google.com/sheets/ and https://developers.google.com/drive/
 #
@@ -23,43 +23,38 @@
 
 #region Dependancies
 
-function ConvertTo-Base64URL
-{
+Function ConvertTo-Base64URL {
     <#
-        .Synopsis
-            convert text or byte array to URL friendly Base64
+    .Synopsis
+        convert text or byte array to URL friendly Base64
 
-        .DESCRIPTION
-            Used for preparing the JWT token to a proper format.
+    .DESCRIPTION
+        Used for preparing the JWT token to a proper format.
 
-        .PARAMETER bytes
-            The bytes to be converted
+    .EXAMPLE
+        ConvertTo-Base64URL -text $headerJSON
 
-        .PARAMETER text
-            The text to be converted
-
-        .EXAMPLE
-            ConvertTo-Base64URL -text $headerJSON
-
-        .EXAMPLE
-            ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256")
+    .EXAMPLE
+        ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256")
     #>
-    param
-    (
-        [Parameter(ParameterSetName='Bytes')]
-        [System.Byte[]]$Bytes,
+    
+    [CmdletBinding()]
 
-        [Parameter(ParameterSetName='String')]
-        [string]$text
+    Param (
+    
+        #String or byte array to be converted
+        [Alias('Bytes','Text')]
+        [Parameter(Mandatory, ValueFromPipeline)
+        $InputObject
+
     )
 
-    if($Bytes){$base = $Bytes}
-    else{$base =  [System.Text.Encoding]::UTF8.GetBytes($text)}
-    $base64Url = [System.Convert]::ToBase64String($base)
-    $base64Url = $base64Url.Split('=')[0]
-    $base64Url = $base64Url.Replace('+', '-')
-    $base64Url = $base64Url.Replace('/', '_')
-    $base64Url
+    $Type = $InputObject.GetType().Name
+    If ($Type -Eq 'Byte[]'){$Bytes = $InputObject}
+    ElseIf ($Type -Eq 'String') {$Bytes = [System.Text.Encoding]::UTF8.GetBytes($InputObject)}
+    $Base64 = [System.Convert]::ToBase64String($Bytes).Split('=')[0].Replace('+', '-').Replace('/', '_')
+    Write-Output -InputObject $Base64
+
 }
 
 #endregion
@@ -133,73 +128,66 @@ function ConvertTo-Base64URL
                 [System.Security.Cryptography.RSACryptoServiceProvider]$rsa
 
             )
+            
+            # build JWT header
+            $header = '{"alg":"RS256","typ":"JWT"}' | ConvertTo-Base64URL
 
-            Begin
-            {
-                # build JWT header
-                $headerJSON = [Ordered]@{
-                    alg = "RS256"
-                    typ = "JWT"
-                } | ConvertTo-Json -Compress
-                $headerBase64 = ConvertTo-Base64URL -text $headerJSON
-            }
-            Process
-            {
-                # Build claims for JWT
-                $now = (Get-Date).ToUniversalTime()
-                $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-                $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s"))
-                $aud = "https://www.googleapis.com/oauth2/v4/token"
-                $claimsJSON = [Ordered]@{
-                    iss = $iss
-                    scope = $scope
-                    aud = $aud
-                    exp = $exp
-                    iat = $iat
-                } | ConvertTo-Json -Compress
+            # Build claims for JWT
+            $claims = [Ordered]@{
 
-                $claimsBase64 = ConvertTo-Base64URL -text $claimsJSON
+                iss = $iss
+                scope = $scope
+                aud = 'https://www.googleapis.com/oauth2/v4/token'
+                exp = [System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds() + 3540
+                iat = [System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 
-                ################# Create JWT
-                # Prep JWT certificate signing
-                switch ($PSCmdlet.ParameterSetName) {
-                    'CertificateFile' {
-                        Write-Verbose "Assembling RSA object based on given certificate file and password"
-                        $googleCert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($certPath, $certPswd,[System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable )
-                        $rsaPrivate = $googleCert.PrivateKey
-                        $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
-                        $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
-                    }
-                    'CertificateObject' {
-                        Write-Verbose "Assembling RSA object based on given certificate object"
-                        $rsaPrivate = $certObj.PrivateKey
-                        $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
-                        $null = $rsa.ImportParameters($rsaPrivate.ExportParameters($true))
-                    }
-                    'RSA' {
-                        Write-Verbose "Using given RSA object as is"
-                    }
-                    Default {
-                        throw "Unknown parameter set"
-                    }
-                }
+            } | ConvertTo-Json -Compress | ConvertTo-Base64URL
 
-                # Signature is our base64urlencoded header and claims, delimited by a period.
-                $toSign = [System.Text.Encoding]::UTF8.GetBytes($headerBase64 + "." + $claimsBase64)
-                $signature = ConvertTo-Base64URL -Bytes $rsa.SignData($toSign,"SHA256") ## this needs to be converted back to regular text
+            ################# Create JWT
+            # Prep JWT certificate signing
+            If ($CertPath) {
 
-                # Build request
-                $jwt = $headerBase64 + "." + $claimsBase64 + "." + $signature
-                $fields = 'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+$jwt
+                Write-Verbose -Message 'Assembling RSA object based on given certificate file and password'
+                $Exportable = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags]::Exportable
+                $GoogleCert = [System.Security.Cryptography.X509Certificates.X509Certificate2]::New($certPath, $certPswd, $Exportable)
+                $RsaPrivate = $googleCert.PrivateKey.ExportParameters($True)
 
-                # Fetch token
-                $response = Invoke-RestMethod -Uri "https://www.googleapis.com/oauth2/v4/token" -Method Post -Body $fields -ContentType "application/x-www-form-urlencoded"
+            } ElseIf ($CertObj) {
+
+                Write-Verbose -Message 'Assembling RSA object based on given certificate object'
+                $RsaPrivate = $CertObj.PrivateKey.ExportParameters($True)
+
+            } ElseIf ($Rsa) {
+
+                Write-Verbose -Message 'Using given Rsa object as is'
 
             }
-            End
-            {
-                return $response.access_token
+            If (-Not $Rsa) {
+
+                $Rsa = [System.Security.Cryptography.RsaCryptoServiceProvider]::New()
+                $Rsa.ImportParameters($RsaPrivate)
+
             }
+
+            # Signature is our base64urlencoded header and claims, delimited by a period.
+            $ToSign = [System.Text.Encoding]::UTF8.GetBytes("$Header`.$Claims")
+            $Signature = $Rsa.SignData($ToSign,'SHA256') | ConvertTo-Base64Url ## this needs to be converted back to regular text
+
+            # Build request
+            $Request = @{
+
+                Uri = 'https://www.googleapis.com/oauth2/v4/token'
+                Method = 'Post'
+                ContentType = 'application/x-www-form-urlencoded'
+                Body = "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=$Header`.$Claims`.$Signature"
+
+            }
+
+            # Fetch token
+            $Response = Invoke-RestMethod @Request
+
+            Write-Output -InputObject $Response.access_token
+
         }
     #endregion
 
@@ -241,7 +229,7 @@ function ConvertTo-Base64URL
                     Requires GUI with Internet Explorer to get first token.
             #>
             [CmdletBinding()]
-            [OutputType([array])]
+            
             Param
             (
                 [Parameter(Mandatory)]
@@ -263,45 +251,44 @@ function ConvertTo-Base64URL
 
             )
 
-            Begin
-            {
-                $requestUri = "https://accounts.google.com/o/oauth2/token"
+            $Request = @{
+                
+                Uri = 'https://accounts.google.com/o/oauth2/token'
+                Method = 'Post'
+                ContentType = 'application/x-www-form-urlencoded'
+                Body = ''
+                
             }
-            Process
-            {
-                if(!($refreshToken))
-                {
-                    ### Get the authorization code - IE Popup and user interaction section
-                    $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
-                    $ie = New-Object -comObject InternetExplorer.Application
-                    $ie.visible = $true
-                    $null = $ie.navigate($auth_string)
+            if (-Not $refreshToken) {
+            
+                ### Get the authorization code - IE Popup and user interaction section
+                $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
+                $ie = New-Object -comObject InternetExplorer.Application # oh dear god why
+                $ie.visible = $true
+                $null = $ie.navigate($auth_string)
 
-                    #Wait for user interaction in IE, manual approval
-                    do{Start-Sleep 1}until($ie.LocationURL -match 'code=([^&]*)')
-                    $null = $ie.LocationURL -match 'code=([^&]*)'
-                    $authorizationCode = $matches[1]
-                    $null = $ie.Quit()
+                #Wait for user interaction in IE, manual approval
+                Do {Start-Sleep -Seconds 1} Until ($IE.LocationUrl -match 'code=([^&]*)')
+                $AuthorizationCode = [System.Text.RegularExpressions.Regex]::New('code=([^&]*)').Match($IE.LocationUrl).Groups[1].Value
+                $null = $ie.Quit()
 
-                    # exchange the authorization code for a refresh token and access token
-                    $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
-
-                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-                }
-                else
-                {
-                    # Exchange the refresh token for new tokens
-                    $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
-                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
-                    Add-Member -InputObject $response -NotePropertyName refreshToken -NotePropertyValue $refreshToken
-                }
+                # exchange the authorization code for a refresh token and access token
+                $Request.Body = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
+                $response = Invoke-RestMethod @Request
+            
+            } else {
+            
+                # Exchange the refresh token for new tokens
+                $request.Body = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
+                $response = Invoke-RestMethod @Request
+                Add-Member -InputObject $response -NotePropertyName refreshToken -NotePropertyValue $refreshToken
+            
             }
-            End
-            {
-                # add alias for backwards compatability
-                Add-Member -InputObject $response -MemberType AliasProperty -Name accesstoken -Value access_token
-                return $response
-            }
+
+            # add alias for backwards compatability
+            Add-Member -InputObject $response -MemberType AliasProperty -Name accesstoken -Value access_token
+            Write-Output -InputObject $response
+
         }
     #endregion
 
@@ -332,7 +319,7 @@ function ConvertTo-Base64URL
             #>
 
             [CmdletBinding()]
-            [OutputType([array])]
+            
             Param
             (
                 [Parameter(Mandatory)]
@@ -346,28 +333,19 @@ function ConvertTo-Base64URL
 
             )
 
-            Begin
-            {
-                $requestUri = "https://accounts.google.com/o/oauth2/token"
-            }
-            Process
-            {
+            ### Get the ID Token - IE Popup and user interaction section
+            $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=token%20id_token&redirect_uri=$redirectUri&client_id=$clientID&approval_prompt=force"
+            $ie = New-Object -comObject InternetExplorer.Application
+            $ie.visible = $true
+            $null = $ie.navigate($auth_string)
 
-                ### Get the ID Token - IE Popup and user interaction section
-                $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=token%20id_token&redirect_uri=$redirectUri&client_id=$clientID&approval_prompt=force"
-                $ie = New-Object -comObject InternetExplorer.Application
-                $ie.visible = $true
-                $null = $ie.navigate($auth_string)
-
-                #Wait for user interaction in IE, manual approval
-                do{Start-Sleep 1}until($ie.LocationURL -match 'id_token=([^&]*)')
-                $null = $ie.LocationURL -match 'id_token=([^&]*)'
-                Write-Debug $ie.LocationURL
-                $id_token = $matches[1]
-                $null = $ie.Quit()
-                return $id_token
-            }
-            End{}
+            #Wait for user interaction in IE, manual approval
+            do {Start-Sleep -Seconds 1} until ($ie.LocationURL -match 'id_token=([^&]*)')
+            $ID_Token = [System.Text.RegularExpressions.Regex]::New('id_token=([^&]*)').Match($IE.LocationUrl).Groups[1].Value
+            Write-Debug -Message $ie.LocationURL
+            $null = $ie.Quit()
+            Write-Output -InputObject $id_token
+           
         }
     #endregion
 
@@ -419,18 +397,13 @@ function Get-GFile
         [Parameter(Mandatory)]
         [string]$outFilePath
 
-        #[string]$mimetype
     )
 
-    Begin{}
-    Process
-    {
-        if ($fileName){$fileID = Get-GFileID -accessToken $accessToken -fileName $fileName}
-        If ($fileID.count -eq 0 -or $fileID.count -gt 1){break}
-        $uri = "https://www.googleapis.com/drive/v3/files/$($fileID)?alt=media"
-        Invoke-RestMethod -Method Get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"} -OutFile $outFilePath
+    if ($fileName) {$fileID = Get-GFileID -accessToken $accessToken -fileName $fileName}
+    If ($fileID.count -Eq 1) {
+        $uri = "https://www.googleapis.com/drive/v3/files/${fileID}?alt=media"
+        Invoke-RestMethod -Method Get -Uri $uri -Headers @{Authorization = "Bearer $accessToken"} -OutFile $outFilePath
     }
-    End{}
 }
 #endregion
 
@@ -470,19 +443,20 @@ function Get-GFileID
         [string]$mimetype
     )
 
-    Begin{}
-    Process
-    {
-        $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
-        if ($mimetype){$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files) | Where-Object {$_.mimetype -eq $mimetype}).id}
-        else{$fileID = (((Invoke-RestMethod -Method get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}).files)).id}
+    
+    $uri = "https://www.googleapis.com/drive/v3/files?q=name%3D'$fileName'"
+    $Response = Invoke-RestMethod -Method Get -Uri $Uri -Headers @{Authorization = "Bearer $accessToken"}
+    if ($mimetype) {$fileID = $Response.Files.Where({$_.MimeType -Eq $MimeType}).ID}
+    else {$fileID = Response.files.id}
 
-        # Logic on multiple IDs being returned
-        If ($fileID.count -eq 0){Write-Warning "There are no files matching the name $fileName"}
-        If ($fileID.count -gt 1){Write-Warning "There are $($fileID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want.";return($fileID)}
-        Else{return($fileID)}
+    # Logic on multiple IDs being returned
+    If ($fileID.count -eq 0) {Write-Warning "There are no files matching the name $fileName"}
+    If ($fileID.count -gt 1) {
+        Write-Warning "There are $($fileID.Count) files matching the provided name. Please investigate the following sheet IDs to verify which file you want."
+        Write-Output -InputObject $fileID
     }
-    End{}
+    Else {Write-Output -InputObject $fileID}
+
 }
 #endregion
 
@@ -540,24 +514,19 @@ function Get-GFilePermissions
         $DefaultFields
     )
 
-    Begin
-    {
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
-        if ($permissionID) {
-            $uri += "/$permissionID"
-        }
-        if (-not $DefaultFields) {
-            $uri += "/?fields=*"
-        }
-        $headers = @{"Authorization"="Bearer $accessToken"}
+    
+    $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions"
+    if ($permissionID) {
+        $uri += "/$permissionID"
     }
+    if (-not $DefaultFields) {
+        $uri += "/?fields=*"
+    }
+    $headers = @{Authorization = "Bearer $accessToken"}
 
-    Process
-    {
-        write-host $uri
-        Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
-    }
-    End{}
+    write-host $uri
+    Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
+   
 }
 
 function Move-GFile
@@ -599,21 +568,15 @@ function Move-GFile
 
         [string]$parentFolderID='root'
     )
+   
+    $uriAdd = "https://www.googleapis.com/drive/v3/files/${fileID}?removeParents=$parentFolderID"
+    $uriRemove = "https://www.googleapis.com/drive/v3/files/${fileID}?addParents=$folderID"
+    $headers = @{Authorization = "Bearer $accessToken"}
 
-    Begin
-    {
-        $uriAdd = "https://www.googleapis.com/drive/v3/files/$fileID"+"?removeParents=$parentFolderID"
-        $uriRemove = "https://www.googleapis.com/drive/v3/files/$fileID"+"?addParents=$folderID"
-        $headers = @{"Authorization"="Bearer $accessToken"}
-    }
+    Invoke-RestMethod -Method patch -Uri $uriAdd -Headers $headers
 
-    Process
-    {
-        Invoke-RestMethod -Method patch -Uri $uriAdd -Headers $headers
-
-        Invoke-RestMethod -Method patch -Uri $uriRemove -Headers $headers
-    }
-    End{}
+    Invoke-RestMethod -Method patch -Uri $uriRemove -Headers $headers
+    
 }
 
 function Remove-GFilePermissions
@@ -655,17 +618,12 @@ function Remove-GFilePermissions
 
     )
 
-    Begin
-    {
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileId/permissions/$permissionId"
-        $headers = @{"Authorization"="Bearer $accessToken"}
-    }
+    
+    $uri = "https://www.googleapis.com/drive/v3/files/$fileId/permissions/$permissionId"
+    $headers = @{Authorization = "Bearer $accessToken"}
 
-    Process
-    {
-        Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers
-    }
-    End{}
+    Invoke-RestMethod -Method Delete -Uri $uri -Headers $headers
+    
 }
 
 function Set-GFilePermissions
@@ -717,24 +675,28 @@ function Set-GFilePermissions
         [ValidateSet('writer','reader','commenter')]
         [string]$role = "writer",
 
-        [ValidateSet($true,$false)]
         [boolean]$sendNotificationEmail = $false,
 
         [ValidateSet('user','group')]
         [string]$type
     )
 
-    Begin{
-        $json = @{emailAddress=$emailAddress;type=$type;role=$role} | ConvertTo-Json
-        $ContentType = "application/json"
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?sendNotificationEmail=$sendNotificationEmail"
-        $headers = @{"Authorization"="Bearer $accessToken"}
+    $Request = @{
+    
+        Method = 'Post'
+        Uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/?sendNotificationEmail=$sendNotificationEmail"
+        Body = @{
+            emailAddress=$emailAddress
+            type=$type
+            role=$role
+        } | ConvertTo-Json
+        ContentType = 'application/json'
+        Headers = @{Authorization = "Bearer $accessToken"}
+    
     }
-    Process
-    {
-        Invoke-RestMethod -Method post -Uri $uri -Body $json -ContentType $ContentType -Headers $headers
-    }
-    End{}
+    
+    Invoke-RestMethod @Request
+    
 }
 
 function Update-GFilePermissions
@@ -776,7 +738,7 @@ function Update-GFilePermissions
         [Parameter(Mandatory)]
         [string]$accessToken,
 
-        #[Alias("spreadSheetID")]
+        
         [Parameter(Mandatory)]
         [string]$fileID,
 
@@ -786,25 +748,25 @@ function Update-GFilePermissions
         [ValidateSet('writer','reader','commenter','owner','organizer')]
         [string]$role = "writer",
 
-        [ValidateSet($true,$false)]
-        [string]$supportTeamDrives = $false,
+        [ValidateSet('True','False')]
+        [string]$supportTeamDrives = 'False',
 
-        [ValidateSet($true,$false)]
-        [string]$transferOwnership = $false
+        [ValidateSet('True','False')]
+        [string]$transferOwnership = 'False'
     )
 
-    Begin{
-        $json = @{role=$role} | ConvertTo-Json
-        $ContentType = "application/json"
-        $uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/$permissionID/?transferOwnership=$transferOwnership"
-        $headers = @{"Authorization"="Bearer $accessToken"}
+    $Request = @{
+    
+        Method = 'Patch'
+        Uri = "https://www.googleapis.com/drive/v3/files/$fileID/permissions/$permissionID/?transferOwnership=$transferOwnership"
+        Body = @{role=$role} | ConvertTo-Json
+        ContentType = 'application/json'
+        Headers = @{Authorization = "Bearer $accessToken"}
+    
     }
-    Process
-    {
 
-        Invoke-RestMethod -Method Patch -Uri $uri -Body $json -ContentType $ContentType -Headers $headers
-    }
-    End{}
+    Invoke-RestMethod @Request
+    
 }
 
 #endregion
@@ -850,18 +812,17 @@ function Update-GFilePermissions
 
         )
 
-        Begin
-        {
-            $properties = @{requests=@(@{addSheet=@{properties=@{title=$sheetName}}})} |convertto-json -Depth 10
+        $Request = @{
+        
+            Headers = @{Authorization = "Bearer $accessToken"}
+            Uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID`:batchUpdate"
+            Method = 'Post'
+            Body = @{requests=@(@{addSheet=@{properties=@{title=$sheetName}}})} |convertto-json -Depth 10
+            ContentType 'application/json'
+        
         }
+        Invoke-RestMethod @Request 
 
-        Process
-        {
-            $suffix = "$spreadSheetID" + ":batchUpdate"
-            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
-            Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType 'application/json' -Headers @{"Authorization"="Bearer $accessToken"}
-        }
-        End{}
     }
 #endregion
 
@@ -908,16 +869,18 @@ function Update-GFilePermissions
 
         )
 
-        Begin{}
-        Process
-        {
-            $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
-            $properties = @{requests=@(@{updateCells=@{range=@{sheetId=$sheetID};fields="userEnteredValue"}})} |ConvertTo-Json -Depth 10
-            $suffix = "$spreadSheetID" + ":batchUpdate"
-            $uri = "https://sheets.googleapis.com/v4/spreadsheets/$suffix"
-            Invoke-RestMethod -Method Post -Uri $uri -Body $properties -ContentType 'application/json' -Headers @{"Authorization"="Bearer $accessToken"}
+        
+        $sheetID = Get-GSheetSheetID -accessToken $accessToken -spreadSheetID $spreadSheetID -sheetName $sheetName
+        
+        $Request = @{
+            Body = @{requests=@(@{updateCells=@{range=@{sheetId=$sheetID};fields="userEnteredValue"}})} | ConvertTo-Json -Depth 10
+            Uri = "https://sheets.googleapis.com/v4/spreadsheets/$spreadSheetID`:batchUpdate"
+            ContentType = 'application/json'
+            Headers = @{Authorization = "Bearer $accessToken"}
+            Method = 'Post'
         }
-        End{}
+        Invoke-RestMethod @Request
+
     }
 #endregion
 
