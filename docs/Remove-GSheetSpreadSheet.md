@@ -23,7 +23,7 @@ Uses the google File Drive API to delete a file.
 
 ### EXAMPLE 1
 ```
-Remove-GSheetSpreadSheet -accessToken $accessToken -spreadSheetID $spreadSheetID
+Remove-GSheetSpreadSheet -accessToken $accessToken -fileID $spreadSheetID
 ```
 
 ## PARAMETERS
