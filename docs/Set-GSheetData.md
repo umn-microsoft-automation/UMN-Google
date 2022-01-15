@@ -25,7 +25,7 @@ Set-GSheetData -accessToken <String> [-rangeA1 <String>] -sheetName <String> -sp
 ```
 
 ## DESCRIPTION
-Set json data values on a sheet in specific cell locations or append data to a sheet
+Set json data values on a sheet in specific cell ranges, specific cells, or append a new row to a sheet
 
 ## EXAMPLES
 
@@ -35,6 +35,11 @@ Set-GSheetData -accessToken $accessToken -rangeA1 'A1:B2' -sheetName 'My Sheet' 
 ```
 
 ### EXAMPLE 2
+```
+Set-GSheetData -accessToken $accessToken -rangeA1 "B2" -sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values @(@('only_one_updated_cell'),@())
+```
+
+### EXAMPLE 3
 ```
 Set-GSheetData -accessToken $accessToken -append 'Append'-sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values $arrayValues
 ```
