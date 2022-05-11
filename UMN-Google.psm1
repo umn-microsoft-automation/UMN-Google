@@ -146,9 +146,8 @@ function ConvertTo-Base64URL
             Process
             {
                 # Build claims for JWT
-                $now = (Get-Date).ToUniversalTime()
-                $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-                $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s"))
+                $iat = [int64]([double]::Parse((get-date -date ([DateTime]::UtcNow) -uformat "%s"),[cultureinfo][system.threading.thread]::currentthread.currentculture))
+                $exp = $iat + 59*60
                 $aud = "https://www.googleapis.com/oauth2/v4/token"
                 $claimsJSON = [Ordered]@{
                     iss = $iss
