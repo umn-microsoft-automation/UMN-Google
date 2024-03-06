@@ -14,7 +14,7 @@ Change parent folder metadata
 
 ```
 Move-GFile [-accessToken] <String> [-fileID] <String> [-folderID] <String> [[-parentFolderID] <String>]
- [<CommonParameters>]
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -87,6 +87,21 @@ Aliases:
 Required: False
 Position: 4
 Default value: Root
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

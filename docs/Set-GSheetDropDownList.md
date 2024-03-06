@@ -15,7 +15,8 @@ schema: 2.0.0
 ```
 Set-GSheetDropDownList [-accessToken] <String> [-startRowIndex] <Int32> [-endRowIndex] <Int32>
  [-columnIndex] <Int32> [-sheetName] <String> [-spreadSheetID] <String> [-values] <String[]>
- [[-inputMessage] <String>] [[-showCustomUi] <Boolean>] [<CommonParameters>]
+ [[-inputMessage] <String>] [[-showCustomUi] <Boolean>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -162,6 +163,21 @@ Aliases:
 
 Required: True
 Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

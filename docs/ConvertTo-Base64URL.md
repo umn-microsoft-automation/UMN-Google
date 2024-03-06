@@ -14,12 +14,12 @@ convert text or byte array to URL friendly Base64
 
 ### Bytes
 ```
-ConvertTo-Base64URL [-Bytes <Byte[]>] [<CommonParameters>]
+ConvertTo-Base64URL [-Bytes <Byte[]>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ### String
 ```
-ConvertTo-Base64URL [-text <String>] [<CommonParameters>]
+ConvertTo-Base64URL [-text <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -61,6 +61,21 @@ The text to be converted
 Type: String
 Parameter Sets: String
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
 
 Required: False
 Position: Named

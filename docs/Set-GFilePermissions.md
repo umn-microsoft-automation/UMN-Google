@@ -14,7 +14,8 @@ Set Permissions on Google File
 
 ```
 Set-GFilePermissions [-accessToken] <String> [-emailAddress] <String> [-fileID] <String> [[-role] <String>]
- [[-sendNotificationEmail] <Boolean>] [[-type] <String>] [<CommonParameters>]
+ [[-sendNotificationEmail] <Boolean>] [[-type] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -115,6 +116,21 @@ Aliases:
 
 Required: False
 Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

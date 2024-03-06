@@ -14,7 +14,8 @@ Update Permissions on Google File
 
 ```
 Update-GFilePermissions [-accessToken] <String> [-fileID] <String> [-permissionID] <String> [[-role] <String>]
- [[-supportTeamDrives] <String>] [[-transferOwnership] <String>] [<CommonParameters>]
+ [[-supportTeamDrives] <String>] [[-transferOwnership] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -118,6 +119,21 @@ Aliases:
 Required: False
 Position: 6
 Default value: False
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

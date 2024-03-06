@@ -15,13 +15,13 @@ Set values in sheet in specific cell locations or append data to a sheet
 ### Append
 ```
 Set-GSheetData -accessToken <String> [-append] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList> [<CommonParameters>]
+ [-valueInputOption <String>] -values <ArrayList> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ### set
 ```
 Set-GSheetData -accessToken <String> [-rangeA1 <String>] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList> [<CommonParameters>]
+ [-valueInputOption <String>] -values <ArrayList> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -147,6 +147,21 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False

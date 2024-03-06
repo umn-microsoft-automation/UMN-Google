@@ -14,7 +14,7 @@ Set the width of a column on a sheet
 
 ```
 Set-GSheetColumnWidth [-accessToken] <String> [[-numberOfColumns] <String>] [-sheetName] <String>
- [-spreadSheetID] <String> [<CommonParameters>]
+ [-spreadSheetID] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -87,6 +87,21 @@ Aliases:
 
 Required: True
 Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
