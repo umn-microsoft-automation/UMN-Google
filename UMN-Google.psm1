@@ -330,6 +330,97 @@ function ConvertTo-Base64URL
         }
     #endregion
 
+    #region Get-GOAuthTokenDevice
+        function Get-GOAuthTokenDevice
+        {
+            <#
+                .Synopsis
+                    Get Valid OAuth Token. Provides login URL for any browser to allow for lack of web driver.
+
+                .PARAMETER appKey
+                    The google project App Key
+
+                .PARAMETER appSecret
+                    The google project application secret
+
+                .PARAMETER projectID
+                    The google project ID
+
+                .PARAMETER redirectUri
+                    An https project redirect. Can be anything as long as https
+
+                .PARAMETER refreshToken
+                    A refresh token if refreshing
+
+                .PARAMETER scope
+                    The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+
+                .EXAMPLE
+                    Get-GOAuthTokenDevice -appKey $appKey -redirectUri $redirectUri -scope $scope
+
+                .EXAMPLE
+                    Get-GOAuthTokenDevice -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
+
+                .NOTES
+                    Requires 2nd device with browser. User interaction required.
+            #>
+            [CmdletBinding()]
+            [OutputType([array])]
+            Param
+            (
+                [Parameter(Mandatory)]
+                [string]$appKey,
+
+                [Parameter(Mandatory)]
+                [string]$appSecret,
+
+                [Parameter(Mandatory)]
+                [string]$projectID,
+
+                [Parameter(Mandatory)]
+                [string]$redirectUri,
+
+                [Parameter(Mandatory)]
+                [string]$scope,
+
+                [string]$refreshToken
+            )
+
+            Begin
+            {
+                $requestUri = "https://accounts.google.com/o/oauth2/token"
+            }
+            Process
+            {
+                if(!($refreshToken))
+                {
+                    ### Get the authorization code - browser Popup and user interaction section
+                    $auth_string = "https://accounts.google.com/o/oauth2/auth?scope=$scope&response_type=code&redirect_uri=$redirectUri&client_id=$appKey&access_type=offline&approval_prompt=force"
+                    $authorizationUrl = Read-Host -Prompt "Visit ` $auth_string ` to authenticate and authorize the app. Paste the all text beyond the code= response in order to continue" -MaskInput
+                    $authorizationUrl -match 'code=([^&]*)'
+                    $authorizationCode = $matches[1]
+                    # exchange the authorization code for a refresh token and access token
+                    $requestBody = "code=$authorizationCode&client_id=$appKey&client_secret=$appSecret&grant_type=authorization_code&redirect_uri=$redirectUri"
+
+                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
+                }
+                else
+                {
+                    # Exchange the refresh token for new tokens
+                    $requestBody = "refresh_token=$refreshToken&client_id=$appKey&client_secret=$appSecret&grant_type=refresh_token"
+                    $response = Invoke-RestMethod -Method Post -Uri $requestUri -ContentType "application/x-www-form-urlencoded" -Body $requestBody
+                    Add-Member -InputObject $response -NotePropertyName refreshToken -NotePropertyValue $refreshToken
+                }
+            }
+            End
+            {
+                # add alias for backwards compatability
+                Add-Member -InputObject $response -MemberType AliasProperty -Name accesstoken -Value access_token
+                return $response
+            }
+        }
+    #endregion
+
     #region Get-GOAuthIdTokenSelenium
 
     function Get-GOAuthIdTokenSelenium
@@ -357,7 +448,7 @@ function ConvertTo-Base64URL
                 Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
 
             .NOTES
-                Requires GUI with Internet Explorer to get first token.
+                Requires GUI with Edge and Selenium web browser.
         #>
 
         [CmdletBinding()]

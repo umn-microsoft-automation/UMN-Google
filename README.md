@@ -1,6 +1,6 @@
 # UMN-Google
 
-## Update '2.0.0'
+## Update '2.0.1'
 
 Updating to work with pwsh 7.4, OS agnostic between Windows and Linux OS. Testing on Ubuntu 22 LTS via WSL. Backwards compatible to powerShell 5.1 of existing cmdlets.
 
@@ -14,6 +14,8 @@ Tested with Edge selenium webdriver - currently the webdriver is expecting this.
 Requires GUI - will maybe get back around to selenium on Linux to pass credentials, but with MFA this is a per business solution.
 
 Get-GOAuthIdTokenSelenium - added Edge selenium driver cmdlet. Leaving Get-GOAuthIdToken which uses IE still from the developer console.
+
+Get-GOAuthTokenDevice - added a cmdlet when no webdriver or browser is available to the system. Generates Url to allow user to log in using any browser to get auth code needed to generate token.
 
 ### Google Group Management Added - service account must have manage to the Google Workspace to modify and read using Cloud Identity API
 
