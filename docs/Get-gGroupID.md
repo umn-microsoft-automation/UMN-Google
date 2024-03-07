@@ -5,32 +5,32 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GOAuthIdToken
+# Get-gGroupID
 
 ## SYNOPSIS
-Get Valid OAuth ID token for a user.
+Get group ID based on Cloud Identity lookup
 
 ## SYNTAX
 
 ```
-Get-GOAuthIdToken [-clientID] <String> [-redirectUri] <String> [-scope] <String>
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-gGroupID [-accessToken] <String> [-groupEmail] <String> [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
+Provide group email address to get group ID lookup for Cloud Identity
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
+Get-gGroupID -accessToken $accessToken -groupEmail 'email@domain.edu'
 ```
 
 ## PARAMETERS
 
-### -clientID
-Client ID within app project
+### -accessToken
+OAuth Access Token for authorization.
 
 ```yaml
 Type: String
@@ -44,9 +44,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -redirectUri
-An https project redirect.
-Can be anything as long as https
+### -groupEmail
+The email address of the group
 
 ```yaml
 Type: String
@@ -55,22 +54,6 @@ Aliases:
 
 Required: True
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -scope
-The API scopes to be included in the request.
-Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -98,8 +81,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Array
+### Provides the groups/groupID  (9ofjh37fijruf)
 ## NOTES
-Requires GUI with Internet Explorer to get first token.
 
 ## RELATED LINKS

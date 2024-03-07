@@ -5,7 +5,7 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GOAuthIdToken
+# Get-GOAuthIdTokenSelenium
 
 ## SYNOPSIS
 Get Valid OAuth ID token for a user.
@@ -13,8 +13,8 @@ Get Valid OAuth ID token for a user.
 ## SYNTAX
 
 ```
-Get-GOAuthIdToken [-clientID] <String> [-redirectUri] <String> [-scope] <String>
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-GOAuthIdTokenSelenium [-clientID] <String> [-redirectUri] <String> [-scope] <String>
+ [[-webDriverPath] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -76,6 +76,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -webDriverPath
+Path to selenium webdriver - will update path of system to include.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -ProgressAction
 {{ Fill ProgressAction Description }}
 
@@ -100,6 +115,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Array
 ## NOTES
-Requires GUI with Internet Explorer to get first token.
+Requires GUI with Edge and Selenium web browser.
 
 ## RELATED LINKS

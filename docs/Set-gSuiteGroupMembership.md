@@ -5,32 +5,33 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GOAuthIdToken
+# Set-gSuiteGroupMembership
 
 ## SYNOPSIS
-Get Valid OAuth ID token for a user.
+Sets members of a google group
 
 ## SYNTAX
 
 ```
-Get-GOAuthIdToken [-clientID] <String> [-redirectUri] <String> [-scope] <String>
- [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Set-gSuiteGroupMembership [-accessToken] <String> [-groupID] <String> [-groupMembership] <String>
+ [-groupDomain] <String> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
+Adds members from an Arraylist of users to a Google Group
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
+New-gSuiteGroup -accessToken $accessToken -groupname $groupName -groupMembership $groupHash
 ```
 
 ## PARAMETERS
 
-### -clientID
-Client ID within app project
+### -accessToken
+access token used for authentication. 
+Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
 ```yaml
 Type: String
@@ -44,9 +45,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -redirectUri
-An https project redirect.
-Can be anything as long as https
+### -groupID
+Unique ID of the group.
+Keys from group ID, group email address, etc.
 
 ```yaml
 Type: String
@@ -60,9 +61,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -scope
-The API scopes to be included in the request.
-Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+### -groupMembership
+Arraylist of users to be added to the group.
 
 ```yaml
 Type: String
@@ -71,6 +71,22 @@ Aliases:
 
 Required: True
 Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -groupDomain
+Domain of the group.
+If the input is lacking the @domain, will be appended
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -98,8 +114,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Array
 ## NOTES
-Requires GUI with Internet Explorer to get first token.
+Written by Kyle Weeks
 
 ## RELATED LINKS

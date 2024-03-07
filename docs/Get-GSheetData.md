@@ -14,7 +14,8 @@ Basic function for retrieving data from a specific Sheet in a Google SpreadSheet
 
 ```
 Get-GSheetData [-accessToken] <String> [-cell] <String> [[-rangeA1] <String>] [-sheetName] <String>
- [-spreadSheetID] <String> [[-valueRenderOption] <String>] [<CommonParameters>]
+ [-spreadSheetID] <String> [[-valueRenderOption] <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -124,6 +125,21 @@ Aliases:
 Required: False
 Position: 6
 Default value: FORMATTED_VALUE
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

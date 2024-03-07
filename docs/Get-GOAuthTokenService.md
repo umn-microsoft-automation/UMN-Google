@@ -14,17 +14,26 @@ Get google auth 2.0 token for a service account
 
 ### CertificateFile
 ```
-Get-GOAuthTokenService -iss <String> -scope <String> -certPath <String> -certPswd <String> [<CommonParameters>]
+Get-GOAuthTokenService -iss <String> -scope <String> -certPath <String> -certPswd <String>
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ### CertificateObject
 ```
-Get-GOAuthTokenService -iss <String> -scope <String> -certObj <X509Certificate2> [<CommonParameters>]
+Get-GOAuthTokenService -iss <String> -scope <String> -certObj <X509Certificate2>
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### jsonFile
+```
+Get-GOAuthTokenService -iss <String> -scope <String> -jsonPath <String> [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ### RSA
 ```
-Get-GOAuthTokenService -iss <String> -scope <String> -rsa <RSACryptoServiceProvider> [<CommonParameters>]
+Get-GOAuthTokenService -iss <String> -scope <String> -rsa <RSACryptoServiceProvider>
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -135,6 +144,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -jsonPath
+Local or network path to JSON auth file generated from GCP Service Principal
+
+```yaml
+Type: String
+Parameter Sets: jsonFile
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -rsa
 provide the System.Security.Cryptography.RSACryptoServiceProvider object directly that will be used to sign the JWT token
 
@@ -144,6 +168,21 @@ Parameter Sets: RSA
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False

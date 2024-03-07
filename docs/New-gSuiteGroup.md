@@ -5,36 +5,34 @@ online version:
 schema: 2.0.0
 ---
 
-# Set-GSheetDropDownList
+# New-gSuiteGroup
 
 ## SYNOPSIS
-{{Fill in the Synopsis}}
+Create a new group - requires super admin permissions
 
 ## SYNTAX
 
 ```
-Set-GSheetDropDownList [-accessToken] <String> [-startRowIndex] <Int32> [-endRowIndex] <Int32>
- [-columnIndex] <Int32> [-sheetName] <String> [-spreadSheetID] <String> [-values] <String[]>
- [[-inputMessage] <String>] [[-showCustomUi] <Boolean>] [-ProgressAction <ActionPreference>]
+New-gSuiteGroup [-accessToken] <String> [-groupEmail] <String> [-displayName] <String> [-groupDomain] <String>
+ [-groupDescription] <String> [[-groupMembership] <String>] [-ProgressAction <ActionPreference>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{Fill in the Description}}
+Creates a new gSuite Group
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 ```
-PS C:\> {{ Add example code here }}
+New-gSuiteGroup -accessToken $accessToken -groupname $groupName -groupMembership $groupHash
 ```
-
-{{ Add example description here }}
 
 ## PARAMETERS
 
 ### -accessToken
-{{Fill accessToken Description}}
+access token used for authentication. 
+Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
 ```yaml
 Type: String
@@ -42,32 +40,17 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -columnIndex
-{{Fill columnIndex Description}}
+### -groupEmail
+Email of the group.
 
 ```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -endRowIndex
-{{Fill endRowIndex Description}}
-
-```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
@@ -78,23 +61,24 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -inputMessage
-{{Fill inputMessage Description}}
+### -displayName
+The display name of the group to be created.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: 7
+Required: True
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -sheetName
-{{Fill sheetName Description}}
+### -groupDomain
+Domain of the group.
+If the input is lacking the @domain, will be appended
 
 ```yaml
 Type: String
@@ -108,23 +92,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -showCustomUi
-{{Fill showCustomUi Description}}
-
-```yaml
-Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -spreadSheetID
-{{Fill spreadSheetID Description}}
+### -groupDescription
+A group description as required
 
 ```yaml
 Type: String
@@ -138,30 +107,15 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -startRowIndex
-{{Fill startRowIndex Description}}
+### -groupMembership
+Arraylist of users to be added to the group.
 
 ```yaml
-Type: Int32
+Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -values
-{{Fill values Description}}
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: True
+Required: False
 Position: 6
 Default value: None
 Accept pipeline input: False
@@ -188,10 +142,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
 ## OUTPUTS
 
-### System.Object
+### System.String
 ## NOTES
+Written by Kyle Weeks
 
 ## RELATED LINKS

@@ -5,32 +5,32 @@ online version:
 schema: 2.0.0
 ---
 
-# Get-GOAuthIdToken
+# Add-gGroupMembership
 
 ## SYNOPSIS
-Get Valid OAuth ID token for a user.
+Add member to google group based on group ID
 
 ## SYNTAX
 
 ```
-Get-GOAuthIdToken [-clientID] <String> [-redirectUri] <String> [-scope] <String>
+Add-gGroupMembership [-accessToken] <String> [-groupID] <String> [-member] <String>
  [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-The ID token is signed by google to represent a user https://developers.google.com/identity/sign-in/web/backend-auth.
+Provide email address of new member to group - requires Cloud Identity API enabled on project
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 ```
-Get-GOAuthIdToken -clientID $clientID -scope $scope -redirectUri $redirectURI
+Add-gGroupMembership -accessToken $accessToken -groupID 'hfiou08uf3' -member 'user@domain.com'
 ```
 
 ## PARAMETERS
 
-### -clientID
-Client ID within app project
+### -accessToken
+OAuth Access Token for authorization.
 
 ```yaml
 Type: String
@@ -44,9 +44,9 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -redirectUri
-An https project redirect.
-Can be anything as long as https
+### -groupID
+The groupID of the group.
+See get-gGroupID for reference.
 
 ```yaml
 Type: String
@@ -60,9 +60,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -scope
-The API scopes to be included in the request.
-Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+### -member
+The email address of the new member to add
 
 ```yaml
 Type: String
@@ -98,8 +97,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Array
+### Success of group member add
 ## NOTES
-Requires GUI with Internet Explorer to get first token.
 
 ## RELATED LINKS

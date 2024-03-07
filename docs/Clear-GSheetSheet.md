@@ -13,7 +13,8 @@ Clear all data and leave formatting intact for a sheet from a spreadsheet based 
 ## SYNTAX
 
 ```
-Clear-GSheetSheet [-accessToken] <String> [-sheetName] <String> [-spreadSheetID] <String> [<CommonParameters>]
+Clear-GSheetSheet [-accessToken] <String> [-sheetName] <String> [-spreadSheetID] <String>
+ [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -76,6 +77,21 @@ Aliases:
 
 Required: True
 Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

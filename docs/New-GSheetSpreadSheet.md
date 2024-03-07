@@ -14,12 +14,14 @@ Create a new Google SpreadSheet.
 
 ### properties
 ```
-New-GSheetSpreadSheet -accessToken <String> [-properties <Array>] [<CommonParameters>]
+New-GSheetSpreadSheet -accessToken <String> [-properties <Array>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ### title
 ```
-New-GSheetSpreadSheet -accessToken <String> [-title <String>] [<CommonParameters>]
+New-GSheetSpreadSheet -accessToken <String> [-title <String>] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -81,6 +83,21 @@ Use this in the simplest case to just create a new sheet with a Title/name
 Type: String
 Parameter Sets: title
 Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
 
 Required: False
 Position: Named
