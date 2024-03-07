@@ -31,7 +31,7 @@ RootModule = 'UMN-Google.psm1'
 ModuleVersion = '2.0.1'
 
 # Supported PSEditions
-CompatiblePSEditions = @('5.1','7.4')
+# CompatiblePSEditions = @()
 
 # ID used to uniquely identify this module
 GUID = '0d016d57-b828-439b-acdc-7cbd9ce764e7'
