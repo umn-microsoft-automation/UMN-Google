@@ -98,7 +98,7 @@ function ConvertTo-Base64URL
                     This is the Google Service account address
 
                 .PARAMETER scope
-                    The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive"
+                    The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive".
 
                 .EXAMPLE
                     Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
@@ -151,9 +151,8 @@ function ConvertTo-Base64URL
             Process
             {
                 # Build claims for JWT
-                $now = (Get-Date).ToUniversalTime()
-                $iat = [Math]::Floor([decimal](Get-Date($now) -UFormat "%s"))
-                $exp = [Math]::Floor([decimal](Get-Date($now.AddMinutes(59)) -UFormat "%s"))
+                $iat = [int64]([double]::Parse((get-date -date ([DateTime]::UtcNow) -uformat "%s"),[cultureinfo][system.threading.thread]::currentthread.currentculture))
+                $exp = $iat + 59*60
                 $aud = "https://www.googleapis.com/oauth2/v4/token"
                 $claimsJSON = [Ordered]@{
                     iss = $iss
@@ -238,9 +237,6 @@ function ConvertTo-Base64URL
                 .PARAMETER appSecret
                     The google project application secret
 
-                .PARAMETER projectID
-                    The google project ID
-
                 .PARAMETER redirectUri
                     An https project redirect. Can be anything as long as https
 
@@ -254,10 +250,10 @@ function ConvertTo-Base64URL
                     File path to selenium webdriver.dll - will add-type the driver .dll if needed and provided.
 
                 .EXAMPLE
-                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope
+                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -redirectUri $redirectUri -scope $scope
 
                 .EXAMPLE
-                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
+                    Get-GOAuthTokenUser -appKey $appKey -appSecret $appSecret -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
 
                 .NOTES
                     Requires GUI with Internet Explorer to get first token.
@@ -271,9 +267,6 @@ function ConvertTo-Base64URL
 
                 [Parameter(Mandatory)]
                 [string]$appSecret,
-
-                [Parameter(Mandatory)]
-                [string]$projectID,
 
                 [Parameter(Mandatory)]
                 [string]$redirectUri,
@@ -343,9 +336,6 @@ function ConvertTo-Base64URL
                 .PARAMETER appSecret
                     The google project application secret
 
-                .PARAMETER projectID
-                    The google project ID
-
                 .PARAMETER redirectUri
                     An https project redirect. Can be anything as long as https
 
@@ -359,7 +349,7 @@ function ConvertTo-Base64URL
                     Get-GOAuthTokenDevice -appKey $appKey -redirectUri $redirectUri -scope $scope
 
                 .EXAMPLE
-                    Get-GOAuthTokenDevice -appKey $appKey -appSecret $appSecret -projectID $projectID -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
+                    Get-GOAuthTokenDevice -appKey $appKey -appSecret $appSecret -redirectUri $redirectUri -scope $scope -refreshToken $refreshToken
 
                 .NOTES
                     Requires 2nd device with browser. User interaction required.
@@ -373,9 +363,6 @@ function ConvertTo-Base64URL
 
                 [Parameter(Mandatory)]
                 [string]$appSecret,
-
-                [Parameter(Mandatory)]
-                [string]$projectID,
 
                 [Parameter(Mandatory)]
                 [string]$redirectUri,
@@ -560,7 +547,83 @@ function ConvertTo-Base64URL
         }
     #endregion
 
-#endregion
+    #region invoke wrapper
+        function Invoke-GWrapper
+        {
+            <#
+                .Synopsis
+                    Wraps any invoke-restmethod in a retry wrapper. Needs work...
+
+                .DESCRIPTION
+                    Finding many Google APIs fail for many non critical reasons.
+
+                .PARAMETER uri
+                    The uri to be invoked
+
+                .PARAMETER headers
+                    The provided header
+
+                .PARAMETER method
+                    The method to invoke
+
+                .PARAMETER body
+                    A hashtable body
+
+                .EXAMPLE
+                    Invoke-GWrapper -uri $uri -header $header
+            #>
+            [CmdletBinding()]
+            param (
+                [Parameter(Mandatory=$true)]
+                [string]
+                $uri,
+
+                [Parameter(Mandatory=$true)]
+                [hashtable]
+                $headers,
+
+                [Parameter(Mandatory=$true)]
+                [ValidateSet("get","post","patch","delete")]
+                $method,
+
+                [hashtable]
+                $body
+            )
+
+            Begin{
+                $completed = $false
+                [int]$retrycount = 0
+                [int]$SecondsDelay = 5
+                [int]$retries = 5
+
+                if ($body) {
+                    $bodyJson = $body | ConvertTo-Json -Depth 10
+                    Write-Verbose -Message "Method set to: Post"
+                }
+            }
+            Process
+            {
+                while (-not $completed) {
+                    try{
+                        If($bodyJson){$response = Invoke-RestMethod -Uri $uri -Headers $header -Body $bodyJson -Method $method}
+                        Else{$response = Invoke-RestMethod -Uri $uri -Headers $headers -Method $method}
+                        $completed = $true
+                    }
+                    catch {
+                        if ($retrycount -ge $Retries) {
+                            throw
+                        }
+                        else {
+                            Start-Sleep $SecondsDelay
+                            $retrycount++
+                            $secondsDelay = $SecondsDelay * $retryCount
+                        }
+                    }
+                }
+            }
+            End{return $response}
+        }
+    #endregion
 
 #region Get-GFile
     function Get-GFile
@@ -618,6 +681,63 @@ function ConvertTo-Base64URL
             If ($fileID.count -eq 0 -or $fileID.count -gt 1){break}
             $uri = "https://www.googleapis.com/drive/v3/files/$($fileID)?alt=media"
             Invoke-RestMethod -Method Get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"} -OutFile $outFilePath
+        }
+        End{}
+    }
+#endregion
+
+#region Get-GFileRevisions
+    function Get-GFileRevisions
+    {
+        <#
+            .Synopsis
+                Get a files revision history
+
+            .DESCRIPTION
+                Get a files revision history
+
+            .PARAMETER accessToken
+                access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
+
+            .PARAMETER fileName
+                Name of file to retrive ID for. Case sensitive
+
+            .PARAMETER fileID
+                File ID.  Can be gotten from Get-GFileID
+
+            .EXAMPLE
+                Get-GFileRevisions -accessToken $accessToken -fileName 'Name of some file'
+                # Get last modified
+                Get-Date ((Get-GFileRevisions -fileName $filename -accessToken $accessToken).revisions.modifiedTime[-1])
+
+            .EXAMPLE
+                Get-GFileRevisions -accessToken $accessToken -fileID 'ID of some file'
+                # Get last modified
+                Get-Date ((Get-GFileRevisions -fileName $filename -accessToken $accessToken).revisions.modifiedTime[-1])
+
+            .NOTES
+                Written by Travis Sobeck
+        #>
+        [CmdletBinding()]
+        Param
+        (
+            [Parameter(Mandatory)]
+            [string]$accessToken,
+
+            [Parameter(ParameterSetName='fileName')]
+            [string]$fileName,
+
+            [Parameter(ParameterSetName='fileID')]
+            [string]$fileID
+        )
+
+        Begin{}
+        Process
+        {
+            if ($fileName){$fileID = Get-GFileID -accessToken $accessToken -fileName $fileName}
+            If ($fileID.count -eq 0 -or $fileID.count -gt 1){break}
+            $uri = "https://www.googleapis.com/drive/v3/files/$($fileID)/revisions"
+            Invoke-RestMethod -Method Get -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
         }
         End{}
     }
@@ -1175,25 +1295,32 @@ function ConvertTo-Base64URL
 
                 $result = Invoke-RestMethod -Method GET -Uri $uri -Headers @{"Authorization"="Bearer $accessToken"}
 
-                # Formatting the returned data
-                $sheet = $result.values
-                $Rows = $sheet.Count
-                $Columns = $sheet[0].Count
-                $HeaderRow = 0
-                $Header = $sheet[0]
-                foreach ($Row in (($HeaderRow + 1)..($Rows-1))) {
-                    $h = [Ordered]@{}
-                    foreach ($Column in 0..($Columns-1)) {
-                        if ($sheet[0][$Column].Length -gt 0) {
-                            $Name = $Header[$Column]
-                            if ($sheet[$row].count -gt ($column)) {
-                                $h.$Name = $Sheet[$Row][$Column]
-                            } else {
-                                $h.$Name = ""
+                #Check if the sheet data is a positive return with no values (blank sheet)
+
+                If(!$result.values){
+                    write-warning "Sheet returned no values! Success response from API! $spreadSheetID $sheetName"
+                }
+                Else{
+                    # Formatting the returned data
+                    $sheet = $result.values
+                    $Rows = $sheet.Count
+                    $Columns = $sheet[0].Count
+                    $HeaderRow = 0
+                    $Header = $sheet[0]
+                    foreach ($Row in (($HeaderRow + 1)..($Rows-1))) {
+                        $h = [Ordered]@{}
+                        foreach ($Column in 0..($Columns-1)) {
+                            if ($sheet[0][$Column].Length -gt 0) {
+                                $Name = $Header[$Column]
+                                if ($sheet[$row].count -gt ($column)) {
+                                    $h.$Name = $Sheet[$Row][$Column]
+                                } else {
+                                    $h.$Name = ""
+                                }
                             }
                         }
+                        [PSCustomObject]$h
                     }
-                    [PSCustomObject]$h
                 }
             }
             End{}
@@ -1551,7 +1678,7 @@ function ConvertTo-Base64URL
                     ID for the target file/spreadSheet.  This is returned when a new sheet is created or use Get-GSheetSpreadSheetID
 
                 .EXAMPLE
-                    Remove-GSheetSpreadSheet -accessToken $accessToken -spreadSheetID $spreadSheetID
+                    Remove-GSheetSpreadSheet -accessToken $accessToken -fileID $spreadSheetID
             #>
             [CmdletBinding()]
             Param
@@ -1714,13 +1841,16 @@ function ConvertTo-Base64URL
                     Set values in sheet in specific cell locations or append data to a sheet
 
                 .DESCRIPTION
-                    Set json data values on a sheet in specific cell locations or append data to a sheet
+                    Set json data values on a sheet in specific cell ranges, specific cells, or append a new row to a sheet
 
                 .PARAMETER accessToken
                     access token used for authentication.  Get from Get-GOAuthTokenUser or Get-GOAuthTokenService
 
                 .PARAMETER append
                     Switch option to append data. See rangeA1 if not appending
+
+                .PARAMETER contenttype
+                    The contenttype specifies the content type of the web request. Default value is 'application/json'.
 
                 .PARAMETER rangeA1
                     Range in A1 notation https://msdn.microsoft.com/en-us/library/bb211395(v=office.12).aspx . The dimensions of the $values you put in MUST fit within this range
@@ -1742,6 +1872,9 @@ function ConvertTo-Base64URL
 
                 .EXAMPLE
                     Set-GSheetData -accessToken $accessToken -append 'Append'-sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values $arrayValues
+
+                .EXAMPLE
+                    Set-GSheetData -accessToken $accessToken -rangeA1 "B2" -sheetName 'My Sheet' -spreadSheetID $spreadSheetID -values @(@('only_one_updated_cell'),@())
 
             #>
             [CmdletBinding()]
@@ -1765,7 +1898,9 @@ function ConvertTo-Base64URL
                 [string]$valueInputOption = 'RAW',
 
                 [Parameter(Mandatory)]
-                [System.Collections.ArrayList]$values
+                [System.Collections.ArrayList]$values,
+
+                [string]$contenttype = 'application/json'
             )
 
             Begin
@@ -1785,7 +1920,7 @@ function ConvertTo-Base64URL
             Process
             {
                 $json = @{values=$values} | ConvertTo-Json
-                Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType "application/json" -Headers @{"Authorization"="Bearer $accessToken"}
+                Invoke-RestMethod -Method $method -Uri $uri -Body $json -ContentType $contenttype -Headers @{"Authorization"="Bearer $accessToken"}
             }
 
             End{}

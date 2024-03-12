@@ -1,5 +1,28 @@
 # UMN-Google
 
+## Update '2.0.2'
+
+Pulling in fixes from various forks, pull requests, and issue items.
+
+Thank you Ronny Buchmann -> from your private fork for fixing encoding to deal with regional items in time for the Get-GOAuthTokenService. Items pulled from your fork to a single new branch to resolve manifiest and documentation.
+
+Thank you cole-seph-fi for an example of updating a single gSheet cell. .EXAMPLE moved to cmdlet directly in the module as platyps is used to auto update and generate the md help files.
+
+Thank you to nickbroeks for catching an example variable mistype between FileID and SpreadSheetID for the cmdlet 'Remove-GSheetSpreadSheet'. Updated moved to cmdlet directly in the module as platyps is used to auto update and generate the md help files.
+
+Thank you to Zappdidappdi for updating contentType to the Set-GSheetData cmdlet allowing for a default contentType - 'application/json' removing a hard coded parameter value.
+
+New cmdlet - Invoke-GWrapper which is a wrapper function to keep trying invoke-RestMethod 5 times in case of API response failure such as unavailable responses (the kind you get at 2AM when the APIs are slammed). This cmdlet needs work to catch on specific errors, and update for variable retry/time wait. Currently set to 5 retries at 5 second wait each.
+
+Thank you Travis and Peter for an old PR = Add Function Get-GFileRevisions
+Get-GFileRevisions will return the drive revision list.  Ref: https://developers.google.com/drive/api/v3/reference/revisions/list
+
+Example to get the last modified date: Get-Date ((Get-GFileRevisions -fileName $filename -accessToken $accessToken).revisions.modifiedTime[-1])
+
+Update Get-GSheetData to return a warning when requesting data of a blank sheet. Returns spreadSheetID + Name of sheet queried.
+
+Removed Project parameter as required for user and device auth. It is not needed.
+
 ## Update '2.0.1'
 
 Updating to work with pwsh 7.4, OS agnostic between Windows and Linux OS. Testing on Ubuntu 22 LTS via WSL. Backwards compatible to powerShell 5.1 of existing cmdlets.

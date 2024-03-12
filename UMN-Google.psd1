@@ -28,7 +28,7 @@
 RootModule = 'UMN-Google.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.0.1'
+ModuleVersion = '2.0.2'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -123,9 +123,11 @@ PrivateData = @{
         # IconUri = ''
 
         # ReleaseNotes of this module
-         ReleaseNotes = 'Verified functionality in pwsh version 7.4 on Windows 11 and Ubuntu with backwards compatibility to powerShell major release version 5
-                        In addition, multiple cmdlets were added to work with Google Workspace for gGroup membership.
-                        Last, IE11 support was removed from core User interactive cmdlets with oAuth tokens. Replaced with EdgeSelenium webDriver'
+         ReleaseNotes = 'Pulled in multiple pull requests as attributed to the README for version 2.0.2. Some small changes, documentation adds, a cultural option is fixed for time and JWT tokens.
+                         Add new cmdlet to stash in on future work for retrying invoke reqeusts against the API endpoint in case of 503 unavailable errors.
+                         Add Function Get-GFileRevisions per Travis and Peter.
+                         Update Get-GSheetData to test for values of a blank response (no data)
+                         projectID parameter removed from User/Device auth cmdlets. This was not needed, and not used.'
 
     } # End of PSData hashtable
 
