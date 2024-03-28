@@ -134,6 +134,9 @@ function ConvertTo-Base64URL
                 [Parameter(Mandatory,ParameterSetName='jsonFile')]
                 [string]$jsonPath,
 
+                [Parameter(Mandatory,ParameterSetName='jsonString')]
+                [string]$jsonString,
+
                 [Parameter(Mandatory,ParameterSetName='RSA')]
                 [System.Security.Cryptography.RSACryptoServiceProvider]$rsa
 
@@ -194,6 +197,22 @@ function ConvertTo-Base64URL
                         {
                             $jsonContents = Get-Content -Raw -Path $jsonPath | ConvertFrom-Json
                             $privateKeyRSA = $jsonContents.private_key
+                            $rsa_parameters = [System.Security.Cryptography.RSA]::create()
+                            [System.Security.Cryptography.RSACryptoServiceProvider]$rsa_parameters.ImportFromPem($privateKeyRSA)
+                            $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
+                            $rsa.ImportParameters($rsa_parameters.ExportParameters($true))
+                        }
+                    }
+                    'jsonString' {
+                        Write-Verbose "Pulling private key from jsonString"
+                        $versionTest = $psversiontable.psversion.major
+                        If ($versionTest -eq '5')
+                        {
+                            write-error "powerShell major version 5 detected, and not supported for JSON Auth string. Please use .p12 or RSA key"
+                        }
+                        Else
+                        {
+                            $privateKeyRSA = ($jsonString | ConvertFrom-Json).private_key
                             $rsa_parameters = [System.Security.Cryptography.RSA]::create()
                             [System.Security.Cryptography.RSACryptoServiceProvider]$rsa_parameters.ImportFromPem($privateKeyRSA)
                             $rsa = New-Object System.Security.Cryptography.RSACryptoServiceProvider
