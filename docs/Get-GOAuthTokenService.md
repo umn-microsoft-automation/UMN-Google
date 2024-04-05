@@ -30,6 +30,12 @@ Get-GOAuthTokenService -iss <String> -scope <String> -jsonPath <String> [-Progre
  [<CommonParameters>]
 ```
 
+### jsonString
+```powershell
+Get-GOAuthTokenService -iss <String> -scope <String> -jsonString <String> [-ProgressAction <ActionPreference>]
+
+```
+
 ### RSA
 ```
 Get-GOAuthTokenService -iss <String> -scope <String> -rsa <RSACryptoServiceProvider>
@@ -150,6 +156,21 @@ Local or network path to JSON auth file generated from GCP Service Principal
 ```yaml
 Type: String
 Parameter Sets: jsonFile
+Aliases:
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -jsonString
+String with a JSON payload that includes a PEM private key as the value of the 'private_key' property. Typically, this is the string contained in the file generated from GCP Service Principal.
+
+```yaml
+Type: String
+Parameter Sets: jsonString
 Aliases:
 
 Required: True
