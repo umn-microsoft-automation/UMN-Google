@@ -14,8 +14,8 @@ Provides login URL for any browser to allow for lack of web driver.
 ## SYNTAX
 
 ```
-Get-GOAuthTokenDevice [-appKey] <String> [-appSecret] <String> [-redirectUri] <String> [-scope] <String>
- [[-refreshToken] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Get-GOAuthTokenDevice [-appKey] <String> [-appSecret] <String> [-projectID] <String> [-redirectUri] <String>
+ [-scope] <String> [[-refreshToken] <String>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -65,6 +65,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -projectID
+The google project ID
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -redirectUri
 An https project redirect.
 Can be anything as long as https
@@ -75,7 +90,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -91,7 +106,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -106,7 +121,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: 6
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

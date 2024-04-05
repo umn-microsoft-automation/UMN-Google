@@ -100,6 +100,9 @@ function ConvertTo-Base64URL
                 .PARAMETER scope
                     The API scopes to be included in the request. Space delimited, "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive".
 
+                .PARAMETER jsonString
+                    A JSON object where the RSA Content is stored as "private_key" such as from a keyVault. Expecting the string as Google provided from GCP IAM Service Principal.
+
                 .EXAMPLE
                     Get-GOAuthTokenService -scope "https://www.googleapis.com/auth/spreadsheets" -certPath "C:\users\$env:username\Desktop\googleSheets.p12" -certPswd 'notasecret' -iss "serviceAccount@googleProjectName.iam.gserviceaccount.com"
                     Generates an access token using the given certificate file and password

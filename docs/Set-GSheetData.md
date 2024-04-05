@@ -15,15 +15,13 @@ Set values in sheet in specific cell locations or append data to a sheet
 ### Append
 ```
 Set-GSheetData -accessToken <String> [-append] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList> [-contenttype <String>] [-ProgressAction <ActionPreference>]
- [<CommonParameters>]
+ [-valueInputOption <String>] -values <ArrayList> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ### set
 ```
 Set-GSheetData -accessToken <String> [-rangeA1 <String>] -sheetName <String> -spreadSheetID <String>
- [-valueInputOption <String>] -values <ArrayList> [-contenttype <String>] [-ProgressAction <ActionPreference>]
- [<CommonParameters>]
+ [-valueInputOption <String>] -values <ArrayList> [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -151,21 +149,6 @@ Aliases:
 Required: True
 Position: Named
 Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -contenttype
-The contenttype specifies the content type of the web request. Default value is 'application/json'.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: Application/json
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
