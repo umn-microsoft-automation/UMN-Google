@@ -31,9 +31,9 @@ Get-GOAuthTokenService -iss <String> -scope <String> -jsonPath <String> [-Progre
 ```
 
 ### jsonString
-```powershell
+```
 Get-GOAuthTokenService -iss <String> -scope <String> -jsonString <String> [-ProgressAction <ActionPreference>]
-
+ [<CommonParameters>]
 ```
 
 ### RSA
